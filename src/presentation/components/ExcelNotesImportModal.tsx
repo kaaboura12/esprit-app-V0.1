@@ -180,10 +180,14 @@ export function ExcelNotesImportModal({
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
       } else {
-        console.error('Failed to download template')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Failed to download template:', errorData.error)
+        // You could add a toast notification here for better UX
+        alert(`Erreur lors du téléchargement: ${errorData.error}`)
       }
     } catch (error) {
       console.error('Template download error:', error)
+      alert('Erreur de connexion lors du téléchargement du modèle')
     } finally {
       setIsGeneratingTemplate(false)
     }

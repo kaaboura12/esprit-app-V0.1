@@ -25,13 +25,6 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
       badge: "12"
     },
     {
-      name: "Gestion Notes",
-      href: "/gestion-notes",
-      icon: BookOpen,
-      description: "Gérer les notes des étudiants",
-      badge: null
-    },
-    {
       name: "Gestion Emplois",
       href: "/gestion-emplois", 
       icon: Calendar,

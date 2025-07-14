@@ -105,7 +105,7 @@ export function useNotes(matiereId: number | null, classeId: number | null) {
         throw new Error(data.error || 'Failed to update note')
       }
 
-      // Update local state
+      // Update local state in real-time
       if (data.note) {
         setStudents(prevStudents => 
           prevStudents.map(student => 
@@ -114,10 +114,47 @@ export function useNotes(matiereId: number | null, classeId: number | null) {
               : student
           )
         )
-      }
 
-      // Refresh statistics
-      await fetchNotes()
+        // Update statistics in real-time
+        setStatistics(prevStats => {
+          const updatedStudents = students.map(student => 
+            student.studentId === studentId 
+              ? { ...student, note: data.note! }
+              : student
+          )
+
+          // Calculate new statistics
+          const totalStudents = updatedStudents.length
+          const studentsWithNotes = updatedStudents.filter(s => 
+            s.note?.noteCC !== null || s.note?.noteTP !== null || s.note?.noteDV !== null
+          ).length
+
+          // Calculate average grade
+          const studentsWithFinalGrades = updatedStudents.filter(s => s.note && s.note.noteFinale !== null)
+          const averageGrade = studentsWithFinalGrades.length > 0
+            ? Math.round(studentsWithFinalGrades.reduce((sum, s) => sum + (s.note!.noteFinale || 0), 0) / studentsWithFinalGrades.length * 100) / 100
+            : null
+
+          // Calculate pass rate
+          const passedStudents = updatedStudents.filter(s => s.note && s.note.noteFinale !== null && s.note.noteFinale >= 10).length
+          const passRate = studentsWithFinalGrades.length > 0 
+            ? Math.round((passedStudents / studentsWithFinalGrades.length) * 100)
+            : 0
+
+          // Calculate completion rate
+          const completionRate = totalStudents > 0 
+            ? Math.round((studentsWithNotes / totalStudents) * 100)
+            : 0
+
+          return {
+            totalStudents,
+            studentsWithNotes,
+            averageGrade,
+            passRate,
+            completionRate
+          }
+        })
+      }
       
       return true
     } catch (err) {
@@ -159,7 +196,8 @@ export function useNotes(matiereId: number | null, classeId: number | null) {
         throw new Error(data.error || 'Failed to batch update notes')
       }
 
-      // Refresh all data
+      // For batch updates, we'll refresh the data since multiple students are involved
+      // This ensures all statistics are properly recalculated
       await fetchNotes()
       
       return true
