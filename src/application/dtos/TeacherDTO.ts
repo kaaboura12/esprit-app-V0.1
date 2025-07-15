@@ -50,6 +50,15 @@ export interface UpdatePhotoResponseDTO {
   success: boolean
   photoUrl?: string
   message?: string
+  token?: string
+  teacher?: {
+    id: number
+    firstname: string
+    lastname: string
+    email: string
+    departement: string
+    photoUrl?: string
+  }
 }
 
 export interface TeacherListResponseDTO {
