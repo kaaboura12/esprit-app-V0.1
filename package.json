@@ -18,6 +18,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
+    "@types/pdf-parse": "^1.1.5",
     "@types/xlsx": "^0.0.35",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.1.0",
@@ -27,6 +28,7 @@
     "multer": "^2.0.1",
     "mysql2": "^3.14.1",
     "next": "15.3.5",
+    "pdf-parse": "^1.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "xlsx": "^0.18.5"
