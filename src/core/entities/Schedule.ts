@@ -19,9 +19,13 @@ export class Schedule {
     private readonly createdAt?: Date,
     private readonly updatedAt?: Date
   ) {
+    // Validate time order
     this.validateTimeOrder()
-    this.validateScheduleDate()
+    
+    // Validate day of week matches schedule date
     this.validateDayOfWeek()
+    
+    // Note: We don't validate schedule date here to allow past schedules for viewing
   }
 
   getId(): number {
@@ -181,20 +185,6 @@ export class Schedule {
   }
 
   /**
-   * Business rule: Cannot schedule classes in the past
-   */
-  private validateScheduleDate(): void {
-    const today = new Date()
-    const scheduleDay = new Date(this.scheduleDate.getFullYear(), this.scheduleDate.getMonth(), this.scheduleDate.getDate())
-    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    
-    // Allow scheduling for today and future dates
-    if (scheduleDay < todayDay) {
-      throw new Error('Cannot schedule classes in the past')
-    }
-  }
-
-  /**
    * Business rule: Day of week must match the schedule date
    */
   private validateDayOfWeek(): void {
@@ -204,6 +194,32 @@ export class Schedule {
     if (this.dayOfWeek !== actualDay) {
       throw new Error(`Day of week '${this.dayOfWeek}' does not match the schedule date (${actualDay})`)
     }
+  }
+
+  /**
+   * Business rule: Cannot schedule classes in the past (for new schedule creation only)
+   * This method should be called when creating NEW schedules, not when loading existing ones
+   */
+  static validateNewScheduleDate(scheduleDate: Date): void {
+    const today = new Date()
+    const scheduleDay = new Date(scheduleDate.getFullYear(), scheduleDate.getMonth(), scheduleDate.getDate())
+    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    
+    // Allow scheduling for today and future dates
+    if (scheduleDay < todayDay) {
+      throw new Error('Cannot schedule classes in the past')
+    }
+  }
+
+  /**
+   * Check if schedule is in the past
+   */
+  isInPast(): boolean {
+    const today = new Date()
+    const scheduleDay = new Date(this.scheduleDate.getFullYear(), this.scheduleDate.getMonth(), this.scheduleDate.getDate())
+    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    
+    return scheduleDay < todayDay
   }
 
   /**
