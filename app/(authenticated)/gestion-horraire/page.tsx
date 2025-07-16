@@ -1,6 +1,5 @@
 "use client"
 
-import { SideNavLayout } from '@/presentation/components/SideNavLayout'
 import { 
   Clock, 
   Construction, 
@@ -12,8 +11,8 @@ import {
 } from 'lucide-react'
 
 export default function GestionHorrairePage() {
-  return (
-    <SideNavLayout>
+    return (
+    <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
         {/* Header */}
         <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-40">
@@ -167,6 +166,6 @@ export default function GestionHorrairePage() {
           </div>
         </div>
       </div>
-    </SideNavLayout>
+    </>
   )
 } 

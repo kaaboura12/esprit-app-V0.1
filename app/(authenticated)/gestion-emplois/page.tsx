@@ -1,6 +1,5 @@
 "use client"
 
-import { SideNavLayout } from "@/presentation/components/SideNavLayout"
 import { useSchedule } from "@/presentation/hooks/useSchedule"
 import { AddScheduleModal } from "@/presentation/components/AddScheduleModal"
 import FullCalendar from '@fullcalendar/react'
@@ -130,237 +129,278 @@ export default function GestionEmploisPage() {
     }
   }
 
+  const updateCalendarTitle = () => {
+    const titleElement = document.getElementById('calendar-title')
+    if (titleElement && calendarRef.current) {
+      const api = calendarRef.current.getApi()
+      const view = api.view
+      const title = view.title
+      titleElement.textContent = title
+    }
+  }
+
   return (
-    <SideNavLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 p-8">
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center space-x-3">
+          <div className="bg-white/95 backdrop-blur-xl border-b border-[#e5e7eb] sticky top-0 z-40">
+            <div className="px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
+                <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                     <Calendar className="w-6 h-6 text-white" />
                   </div>
-                  <span>Gestion des Emplois du Temps</span>
-                </h1>
-                <p className="text-lg text-gray-600">
-                  Organisez et gérez les emplois du temps de votre établissement
-                </p>
-              </div>
-              
-              <div className="flex items-center space-x-4">
+                  <div>
+                    <h1 className="text-3xl font-bold text-black">Gestion des Emplois du Temps</h1>
+                    <p className="text-[#6b7280] mt-1">Organisez et gérez les emplois du temps de votre établissement</p>
+                  </div>
+                </div>
                 <button 
                   onClick={() => {
                     setSelectedDate(new Date())
                     setIsAddEventModalOpen(true)
                   }}
-                  className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 group"
+                  className="inline-flex items-center gap-2 px-6 py-2 bg-[#ef4444] text-white rounded-xl font-semibold hover:bg-[#dc2626] transition-colors shadow-md mt-2 md:mt-0"
                 >
-                  <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                  <span className="font-medium">Nouvel Événement</span>
+                  <Plus className="w-4 h-4" />
+                  Nouvel Événement
                 </button>
-                
-                <button className="flex items-center space-x-2 px-4 py-3 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-300">
-                  <Download className="w-5 h-5 text-gray-600" />
-                  <span className="font-medium text-gray-700">Exporter</span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#e5e7eb] rounded-xl hover:shadow-md transition-all duration-300">
+                  <Download className="w-4 h-4 text-[#6b7280]" />
+                  <span className="font-medium text-[#374151]">Exporter</span>
                 </button>
-                
-                <button className="flex items-center space-x-2 px-4 py-3 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-300">
-                  <Upload className="w-5 h-5 text-gray-600" />
-                  <span className="font-medium text-gray-700">Importer</span>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#e5e7eb] rounded-xl hover:shadow-md transition-all duration-300">
+                  <Upload className="w-4 h-4 text-[#6b7280]" />
+                  <span className="font-medium text-[#374151]">Importer</span>
                 </button>
               </div>
             </div>
+          </div>
 
-                        {/* View Controls */}
-            <div className="flex justify-center">
-              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-lg p-2">
-                <button
-                  onClick={() => {
-                    setCurrentView('dayGridMonth')
-                    calendarRef.current?.getApi().changeView('dayGridMonth')
-                  }}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                    currentView === 'dayGridMonth'
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  Mois
-                </button>
-                <button
-                  onClick={() => {
-                    setCurrentView('timeGridWeek')
-                    calendarRef.current?.getApi().changeView('timeGridWeek')
-                  }}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                    currentView === 'timeGridWeek'
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  Semaine
-                </button>
-                <button
-                  onClick={() => {
-                    setCurrentView('timeGridDay')
-                    calendarRef.current?.getApi().changeView('timeGridDay')
-                  }}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                    currentView === 'timeGridDay'
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  Jour
-                </button>
-                <button
-                  onClick={() => {
-                    setCurrentView('listWeek')
-                    calendarRef.current?.getApi().changeView('listWeek')
-                  }}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                    currentView === 'listWeek'
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  Liste
-                </button>
+          {/* Statistic Cards */}
+          <div className="px-8 pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">
+                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.courseCount || 0)}
+                </span>
               </div>
+              <span className="text-[#374151] text-sm">Cours cette semaine</span>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">
+                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.tdCount || 0)}
+                </span>
+              </div>
+              <span className="text-[#374151] text-sm">TD cette semaine</span>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">
+                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.tpCount || 0)}
+                </span>
+              </div>
+              <span className="text-[#374151] text-sm">TP cette semaine</span>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">
+                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.activeSchedules || 0)}
+                </span>
+              </div>
+              <span className="text-[#374151] text-sm">Emplois actifs</span>
             </div>
           </div>
 
           {/* Calendar Section */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl overflow-hidden">
-            <div className="p-6">
-              {loading && (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-red-500" />
-                  <span className="ml-2 text-gray-600">Chargement des emplois du temps...</span>
+          <div className="px-8 py-10">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl overflow-hidden">
+              {/* Calendar Header with View Controls */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">Calendrier</h2>
+                      <p className="text-sm text-gray-600">Gérez vos emplois du temps</p>
+                    </div>
+                  </div>
+                  
+                  {/* View Controls */}
+                  <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-200 shadow-sm p-1">
+                    <button
+                      onClick={() => {
+                        setCurrentView('dayGridMonth')
+                        calendarRef.current?.getApi().changeView('dayGridMonth')
+                      }}
+                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                        currentView === 'dayGridMonth'
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                    >
+                      Mois
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentView('timeGridWeek')
+                        calendarRef.current?.getApi().changeView('timeGridWeek')
+                      }}
+                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                        currentView === 'timeGridWeek'
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                    >
+                      Semaine
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentView('timeGridDay')
+                        calendarRef.current?.getApi().changeView('timeGridDay')
+                      }}
+                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                        currentView === 'timeGridDay'
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                    >
+                      Jour
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentView('listWeek')
+                        calendarRef.current?.getApi().changeView('listWeek')
+                      }}
+                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                        currentView === 'listWeek'
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                    >
+                      Liste
+                    </button>
+                  </div>
                 </div>
-              )}
+                
+                {/* Navigation Controls */}
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => calendarRef.current?.getApi().prev()}
+                      className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => calendarRef.current?.getApi().today()}
+                      className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-medium text-sm hover:shadow-md transition-all duration-200"
+                    >
+                      Aujourd'hui
+                    </button>
+                    <button
+                      onClick={() => calendarRef.current?.getApi().next()}
+                      className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="text-lg font-semibold text-gray-900" id="calendar-title">
+                    {/* This will be updated by FullCalendar */}
+                  </div>
+                </div>
+              </div>
               
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-center">
-                    <X className="w-5 h-5 text-red-500 mr-2" />
-                    <span className="text-red-700">Erreur: {error}</span>
+              <div className="p-6">
+                {loading && (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-red-500" />
+                    <span className="ml-2 text-gray-600">Chargement des emplois du temps...</span>
                   </div>
-                </div>
-              )}
-              
-              {!loading && !error && (
-                <FullCalendar
-                ref={calendarRef}
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                initialView={currentView}
-                headerToolbar={{
-                  left: 'prev,next today',
-                  center: 'title',
-                  right: ''
-                }}
-                events={allEvents}
-                editable={true}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={true}
-                weekends={true}
-                select={handleDateSelect}
-                eventClick={handleEventClick}
-                height="auto"
-                locale="fr"
-                slotMinTime="09:00:00"
-                slotMaxTime="17:00:00"
-                allDaySlot={false}
-                eventDisplay="block"
-                dayHeaderFormat={{ weekday: 'long', day: 'numeric' }}
-                slotLabelFormat={{
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: false
-                }}
-                eventTimeFormat={{
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: false
-                }}
-                buttonText={{
-                  today: "Aujourd'hui",
-                  month: 'Mois',
-                  week: 'Semaine',
-                  day: 'Jour',
-                  list: 'Liste'
-                }}
-                firstDay={1} // Start week on Monday
-                viewDidMount={() => {
-                  // Custom styling for calendar
-                  const calendarElement = document.querySelector('.fc')
-                  if (calendarElement) {
-                    calendarElement.classList.add('custom-calendar')
-                  }
-                }}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                  <BookOpen className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.courseCount || 0)}
+                )}
+                
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-center">
+                      <X className="w-5 h-5 text-red-500 mr-2" />
+                      <span className="text-red-700">Erreur: {error}</span>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">Cours cette semaine</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-gray-800 to-black rounded-xl flex items-center justify-center">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.tdCount || 0)}
-                  </div>
-                  <div className="text-sm text-gray-600">TD cette semaine</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.tpCount || 0)}
-                  </div>
-                  <div className="text-sm text-gray-600">TP cette semaine</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.activeSchedules || 0)}
-                  </div>
-                  <div className="text-sm text-gray-600">Emplois actifs</div>
-                </div>
+                )}
+                
+                {!loading && !error && (
+                  <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                    initialView={currentView}
+                    headerToolbar={false}
+                    events={allEvents}
+                    editable={true}
+                    selectable={true}
+                    selectMirror={true}
+                    dayMaxEvents={true}
+                    weekends={true}
+                    select={handleDateSelect}
+                    eventClick={handleEventClick}
+                    height="auto"
+                    locale="fr"
+                    slotMinTime="08:00:00"
+                    slotMaxTime="18:00:00"
+                    allDaySlot={false}
+                    eventDisplay="block"
+                    dayHeaderFormat={{ weekday: 'long', day: 'numeric' }}
+                    slotLabelFormat={{
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    }}
+                    eventTimeFormat={{
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    }}
+                    buttonText={{
+                      today: "Aujourd'hui",
+                      month: 'Mois',
+                      week: 'Semaine',
+                      day: 'Jour',
+                      list: 'Liste'
+                    }}
+                    firstDay={1} // Start week on Monday
+                    viewDidMount={() => {
+                      // Custom styling for calendar
+                      const calendarElement = document.querySelector('.fc')
+                      if (calendarElement) {
+                        calendarElement.classList.add('custom-calendar')
+                      }
+                      updateCalendarTitle()
+                    }}
+                    datesSet={updateCalendarTitle}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -611,6 +651,7 @@ export default function GestionEmploisPage() {
           align-items: center !important;
           justify-content: center !important;
         }
+        
         .custom-calendar .pause-block {
           background: #e5e7eb !important;
           color: #6b7280 !important;
@@ -623,6 +664,6 @@ export default function GestionEmploisPage() {
           pointer-events: none;
         }
       `}</style>
-    </SideNavLayout>
+    </>
   )
 } 

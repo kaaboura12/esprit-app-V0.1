@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from 'react'
-import { SideNavLayout } from '@/presentation/components/SideNavLayout'
 import { useTeacherClasses } from '@/presentation/hooks/useTeacherClasses'
 import { Users, BookOpen, User, Search, Loader2, AlertCircle, ChevronRight, Edit3 } from 'lucide-react'
 import Link from 'next/link'
@@ -51,15 +50,20 @@ export default function GestionClassroomPage() {
   }
 
   return (
-    <SideNavLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-[#f3f4f6] via-white to-gray-100">
         {/* Header */}
         <div className="bg-white/95 backdrop-blur-xl border-b border-[#e5e7eb] sticky top-0 z-40">
           <div className="px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
-              <div>
-                <h1 className="text-3xl font-bold text-black">Gestion des Classes</h1>
-                <p className="text-[#6b7280] mt-1">Visualisez et gérez vos classes de façon moderne</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-black">Gestion des Classes</h1>
+                  <p className="text-[#6b7280] mt-1">Visualisez et gérez vos classes de façon moderne</p>
+                </div>
               </div>
               <button
                 onClick={() => setShowAddClassModal(true)}
@@ -85,20 +89,40 @@ export default function GestionClassroomPage() {
         {/* Statistic Cards */}
         <div className="px-8 pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
-            <span className="text-[#ef4444] font-bold text-2xl">{totalClasses}</span>
-            <span className="text-[#374151] text-sm mt-2">Total classes</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[#ef4444] font-bold text-2xl">{totalClasses}</span>
+            </div>
+            <span className="text-[#374151] text-sm">Total classes</span>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
-            <span className="text-[#ef4444] font-bold text-2xl">{totalStudents}</span>
-            <span className="text-[#374151] text-sm mt-2">Total étudiants</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[#ef4444] font-bold text-2xl">{totalStudents}</span>
+            </div>
+            <span className="text-[#374151] text-sm">Total étudiants</span>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
-            <span className="text-[#ef4444] font-bold text-2xl">{averageCapacity}%</span>
-            <span className="text-[#374151] text-sm mt-2">Capacité moyenne</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                <div className="w-5 h-5 text-white font-bold text-lg">%</div>
+              </div>
+              <span className="text-[#ef4444] font-bold text-2xl">{averageCapacity}%</span>
+            </div>
+            <span className="text-[#374151] text-sm">Capacité moyenne</span>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
-            <span className="text-[#ef4444] font-bold text-2xl">{nearlyFullClasses}</span>
-            <span className="text-[#374151] text-sm mt-2">Classes presque pleines</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[#ef4444] font-bold text-2xl">{nearlyFullClasses}</span>
+            </div>
+            <span className="text-[#374151] text-sm">Classes presque pleines</span>
           </div>
         </div>
 
@@ -200,12 +224,13 @@ export default function GestionClassroomPage() {
           )}
         </div>
       </div>
+      
       <AddClassModal
         isOpen={showAddClassModal}
         onClose={() => setShowAddClassModal(false)}
         onSubmit={handleAddClass}
         isLoading={isAddingClass}
       />
-    </SideNavLayout>
+    </>
   )
 } 

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { SideNavLayout } from '@/presentation/components/SideNavLayout'
 import { useNotes } from '@/presentation/hooks/useNotes'
 import { useTeacherClasses } from '@/presentation/hooks/useTeacherClasses'
 import { useTeacherSubjects } from '@/presentation/hooks/useTeacherSubjects'
@@ -99,7 +98,7 @@ export default function NotesDetailPage() {
   }
 
   return (
-    <SideNavLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
         {/* Header */}
         <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-40">
@@ -116,14 +115,19 @@ export default function NotesDetailPage() {
             </div>
             
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Gestion des Notes</h1>
-                <p className="text-gray-600 mt-1">
-                  {subject && currentClass 
-                    ? `${subject.nommatiere} - ${currentClass.className}`
-                    : 'Chargement...'
-                  }
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Gestion des Notes</h1>
+                  <p className="text-gray-600 mt-1">
+                    {subject && currentClass 
+                      ? `${subject.nommatiere} - ${currentClass.className}`
+                      : 'Chargement...'
+                    }
+                  </p>
+                </div>
               </div>
               
               <div className="flex items-center space-x-4">
@@ -196,30 +200,26 @@ export default function NotesDetailPage() {
         <div className="px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Étudiants</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{statistics.totalStudents}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
                 </div>
-                <div className="p-3 bg-blue-50 rounded-xl">
-                  <Users className="w-6 h-6 text-blue-600" />
-                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">{statistics.totalStudents}</span>
               </div>
+              <span className="text-[#374151] text-sm">Total Étudiants</span>
               <div className="mt-4 flex items-center text-sm">
                 <span className="text-gray-600">Inscrits</span>
               </div>
             </div>
 
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Notés</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{statistics.studentsWithNotes}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-white" />
                 </div>
-                <div className="p-3 bg-green-50 rounded-xl">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">{statistics.studentsWithNotes}</span>
               </div>
+              <span className="text-[#374151] text-sm">Notés</span>
               <div className="mt-4 flex items-center text-sm">
                 <span className="text-gray-600">
                   {statistics.totalStudents > 0 ? Math.round((statistics.studentsWithNotes / statistics.totalStudents) * 100) : 0}% du total
@@ -228,30 +228,26 @@ export default function NotesDetailPage() {
             </div>
 
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Moyenne</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{statistics.averageGrade || 0}/20</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-white" />
                 </div>
-                <div className="p-3 bg-purple-50 rounded-xl">
-                  <BarChart3 className="w-6 h-6 text-purple-600" />
-                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">{statistics.averageGrade || 0}/20</span>
               </div>
+              <span className="text-[#374151] text-sm">Moyenne</span>
               <div className="mt-4 flex items-center text-sm">
                 <span className="text-gray-600">Note finale</span>
               </div>
             </div>
 
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Taux de réussite</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{statistics.passRate}%</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Star className="w-5 h-5 text-white" />
                 </div>
-                <div className="p-3 bg-yellow-50 rounded-xl">
-                  <Star className="w-6 h-6 text-yellow-600" />
-                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">{statistics.passRate}%</span>
               </div>
+              <span className="text-[#374151] text-sm">Taux de réussite</span>
               <div className="mt-4 flex items-center text-sm">
                 <span className="text-yellow-600 font-medium">≥ 10/20</span>
               </div>
@@ -434,6 +430,6 @@ export default function NotesDetailPage() {
           hasTPComponent={hasTPComponent}
         />
       )}
-    </SideNavLayout>
+    </>
   )
 } 

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { SideNavLayout } from '@/presentation/components/SideNavLayout'
 import { useStudents } from '@/presentation/hooks/useStudents'
 import { useTeacherClasses } from '@/presentation/hooks/useTeacherClasses'
 import { AddStudentModal, AddStudentFormData } from '@/presentation/components/AddStudentModal'
@@ -108,7 +107,7 @@ export default function GestionEtudiantsPage() {
   }
 
   return (
-    <SideNavLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
         {/* Header */}
         <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200/60 sticky top-0 z-40">
@@ -127,14 +126,19 @@ export default function GestionEtudiantsPage() {
             )}
             
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Gestion des Étudiants</h1>
-                <p className="text-gray-600 mt-1">
-                  {searchParams.get('classeId') 
-                    ? `Gérez les étudiants de la classe sélectionnée`
-                    : `Gérez les informations et parcours de vos étudiants`
-                  }
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Gestion des Étudiants</h1>
+                  <p className="text-gray-600 mt-1">
+                    {searchParams.get('classeId') 
+                      ? `Gérez les étudiants de la classe sélectionnée`
+                      : `Gérez les informations et parcours de vos étudiants`
+                    }
+                  </p>
+                </div>
               </div>
               
               <div className="flex items-center space-x-4">
@@ -165,15 +169,13 @@ export default function GestionEtudiantsPage() {
         <div className="px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Étudiants</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{totalStudents}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
                 </div>
-                <div className="p-3 bg-blue-50 rounded-xl">
-                  <Users className="w-6 h-6 text-blue-600" />
-                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">{totalStudents}</span>
               </div>
+              <span className="text-[#374151] text-sm">Total Étudiants</span>
               <div className="mt-4 flex items-center text-sm">
                 <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
                 <span className="text-green-600 font-medium">+5</span>
@@ -182,15 +184,13 @@ export default function GestionEtudiantsPage() {
             </div>
 
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Étudiants Actifs</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{activeStudents}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-white" />
                 </div>
-                <div className="p-3 bg-green-50 rounded-xl">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">{activeStudents}</span>
               </div>
+              <span className="text-[#374151] text-sm">Étudiants Actifs</span>
               <div className="mt-4 flex items-center text-sm">
                 <span className="text-gray-600">
                   {totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : 0}% du total
@@ -199,30 +199,26 @@ export default function GestionEtudiantsPage() {
             </div>
 
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Nouveaux</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{newStudents}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <UserPlus className="w-5 h-5 text-white" />
                 </div>
-                <div className="p-3 bg-purple-50 rounded-xl">
-                  <UserPlus className="w-6 h-6 text-purple-600" />
-                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">{newStudents}</span>
               </div>
+              <span className="text-[#374151] text-sm">Nouveaux</span>
               <div className="mt-4 flex items-center text-sm">
                 <span className="text-purple-600 font-medium">Cette semaine</span>
               </div>
             </div>
 
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Âge Moyen</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{averageAge}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-white" />
                 </div>
-                <div className="p-3 bg-orange-50 rounded-xl">
-                  <Calendar className="w-6 h-6 text-orange-600" />
-                </div>
+                <span className="text-[#ef4444] font-bold text-2xl">{averageAge}</span>
               </div>
+              <span className="text-[#374151] text-sm">Âge Moyen</span>
               <div className="mt-4 flex items-center text-sm">
                 <span className="text-gray-600">ans</span>
               </div>
@@ -610,6 +606,6 @@ export default function GestionEtudiantsPage() {
           selectedClassName={classeName || ''}
         />
       )}
-    </SideNavLayout>
+    </>
   )
 } 

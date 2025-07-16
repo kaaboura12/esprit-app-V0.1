@@ -1,6 +1,5 @@
 "use client"
 
-import { SideNavLayout } from "@/presentation/components/SideNavLayout"
 import { 
   User, 
   Mail, 
@@ -26,28 +25,24 @@ export default function ProfilePage() {
   // Show loading state while fetching teacher data
   if (loading) {
     return (
-      <SideNavLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center">
-          <div className="flex items-center space-x-3 text-gray-600">
-            <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-lg">Chargement du profil...</span>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="flex items-center space-x-3 text-gray-600">
+          <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-lg">Chargement du profil...</span>
         </div>
-      </SideNavLayout>
+      </div>
     )
   }
 
   // Show error state if no teacher data
   if (!teacher) {
     return (
-      <SideNavLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center">
-          <div className="text-center text-gray-600">
-            <h2 className="text-xl font-semibold mb-2">Erreur</h2>
-            <p>Impossible de charger les données du profil.</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="text-center text-gray-600">
+          <h2 className="text-xl font-semibold mb-2">Erreur</h2>
+          <p>Impossible de charger les données du profil.</p>
         </div>
-      </SideNavLayout>
+      </div>
     )
   }
 
@@ -129,7 +124,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <SideNavLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center p-8">
         <div className="w-full max-w-2xl">
           {/* Profile Card */}
@@ -284,6 +279,6 @@ export default function ProfilePage() {
         onChange={handleFileChange}
         className="hidden"
       />
-    </SideNavLayout>
+    </>
   )
 } 
