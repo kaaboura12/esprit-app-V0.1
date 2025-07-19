@@ -164,12 +164,11 @@ export default function GestionClassroomPage() {
                   </div>
                   {/* Class Name & Subject */}
                   <div className="flex items-center mb-4 gap-3">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#ef4444] text-white font-bold text-xl shadow-lg">
-                      {classe.className[0]}
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#ef4444] text-white font-bold text-xs shadow-lg">
+                      {classe.className}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="font-bold text-lg text-black truncate">{classe.className}</h2>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2">
                         <BookOpen className="w-4 h-4 text-[#ef4444]" />
                         <span className="text-sm text-[#374151] truncate">{classe.subjectName}</span>
                       </div>

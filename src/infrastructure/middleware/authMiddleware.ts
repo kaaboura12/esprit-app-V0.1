@@ -23,17 +23,25 @@ export async function authMiddleware(request: NextRequest): Promise<{
   error?: string
 }> {
   try {
-    // Extract token from Authorization header
+    let token: string | null = null
+
+    // First try to get token from Authorization header
     const authHeader = request.headers.get('authorization')
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return {
-        isAuthenticated: false,
-        error: 'Missing or invalid authorization header'
-      }
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7) // Remove 'Bearer ' prefix
     }
 
-    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+    // If no token in header, try to get from cookies (for browser requests)
+    if (!token) {
+      token = getTokenFromCookies(request)
+    }
+
+    if (!token) {
+      return {
+        isAuthenticated: false,
+        error: 'No authentication token found'
+      }
+    }
 
     // Validate token using use case
     const tokenService = JwtTokenServiceSingleton.getInstance()

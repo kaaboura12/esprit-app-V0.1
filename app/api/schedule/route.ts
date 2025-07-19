@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     
     // Validate required fields
-    const requiredFields = ['teacherId', 'matiereId', 'classeId', 'dayOfWeek', 'scheduleDate', 'weekStartDate', 'startTime', 'endTime', 'sessionType']
+    const requiredFields = ['teacherId', 'matiereId', 'classeId', 'scheduleDate', 'weekStartDate', 'startTime', 'endTime', 'sessionType']
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json({ error: `Missing required field: ${field}` }, { status: 400 })
@@ -126,7 +126,6 @@ export async function POST(request: NextRequest) {
       body.teacherId,
       body.matiereId,
       body.classeId,
-      body.dayOfWeek,
       new Date(body.scheduleDate),
       new Date(body.weekStartDate),
       body.startTime,

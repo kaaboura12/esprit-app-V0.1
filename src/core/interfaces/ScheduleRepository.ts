@@ -68,4 +68,14 @@ export interface ScheduleRepository {
     tdCount: number
     tpCount: number
   }>
+
+  /**
+   * Find class ID by class name
+   */
+  findClasseIdByName(nomClasse: string): Promise<number | null>
+
+  /**
+   * Find subject ID by subject name
+   */
+  findMatiereIdByName(nomMatiere: string): Promise<number | null>
 } 

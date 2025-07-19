@@ -1,18 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
-import { 
-  X, 
-  Calendar, 
-  Clock, 
-  User, 
-  BookOpen, 
-  MapPin, 
-  Plus,
-  Loader2,
-  AlertCircle,
-  CheckCircle
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Plus, Calendar, Clock, BookOpen, Users, FileText, CheckCircle, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/presentation/hooks/useAuth'
 
 export interface AddScheduleModalProps {
@@ -42,17 +31,16 @@ export function AddScheduleModal({
 }: AddScheduleModalProps) {
   const { teacher } = useAuth()
   const [loading, setLoading] = useState(false)
-  const [subjects, setSubjects] = useState<Subject[]>([])
-  const [classes, setClasses] = useState<Class[]>([])
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [classes, setClasses] = useState<Class[]>([])
 
   // Form state
   const [formData, setFormData] = useState({
     matiereId: '',
     classeId: '',
     scheduleDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
-    dayOfWeek: '',
     startTime: '',
     endTime: '',
     sessionType: 'cours' as 'cours' | 'td' | 'tp' | 'exam',
@@ -65,16 +53,6 @@ export function AddScheduleModal({
       loadDropdownData()
     }
   }, [isOpen])
-
-  // Update day of week when date changes
-  useEffect(() => {
-    if (formData.scheduleDate) {
-      const date = new Date(formData.scheduleDate)
-      const dayNames = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi']
-      const dayOfWeek = dayNames[date.getDay()]
-      setFormData(prev => ({ ...prev, dayOfWeek }))
-    }
-  }, [formData.scheduleDate])
 
   const loadDropdownData = async () => {
     try {
@@ -113,7 +91,6 @@ export function AddScheduleModal({
         teacherId: teacher?.id || 0,
         matiereId: parseInt(formData.matiereId),
         classeId: parseInt(formData.classeId),
-        dayOfWeek: formData.dayOfWeek,
         scheduleDate: formData.scheduleDate,
         weekStartDate: weekStartDate.toISOString().split('T')[0],
         startTime: formData.startTime,
@@ -154,7 +131,6 @@ export function AddScheduleModal({
       matiereId: '',
       classeId: '',
       scheduleDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
-      dayOfWeek: '',
       startTime: '',
       endTime: '',
       sessionType: 'cours',
@@ -220,7 +196,7 @@ export function AddScheduleModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Date and Time Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Calendar className="w-4 h-4 inline mr-2" />
@@ -248,34 +224,25 @@ export function AddScheduleModal({
                 required
               />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Clock className="w-4 h-4 inline mr-2" />
-                Heure de fin
-              </label>
-              <input
-                type="time"
-                value={formData.endTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                required
-              />
-            </div>
           </div>
 
-          {/* Teacher and Subject Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <User className="w-4 h-4 inline mr-2" />
-                Enseignant
-              </label>
-              <div className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600">
-                {teacher ? `${teacher.firstname} ${teacher.lastname} - ${teacher.departement}` : 'Enseignant non connecté'}
-              </div>
-            </div>
+          {/* End Time */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Clock className="w-4 h-4 inline mr-2" />
+              Heure de fin
+            </label>
+            <input
+              type="time"
+              value={formData.endTime}
+              onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              required
+            />
+          </div>
 
+          {/* Subject and Class Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <BookOpen className="w-4 h-4 inline mr-2" />
@@ -288,21 +255,18 @@ export function AddScheduleModal({
                 required
               >
                 <option value="">Sélectionner une matière</option>
-                {subjects.map(subject => (
+                {subjects.map((subject) => (
                   <option key={subject.id} value={subject.id}>
                     {subject.nommatiere}
                   </option>
                 ))}
               </select>
             </div>
-          </div>
 
-          {/* Class and Session Type Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <MapPin className="w-4 h-4 inline mr-2" />
-                Classe/Salle
+                <Users className="w-4 h-4 inline mr-2" />
+                Classe
               </label>
               <select
                 value={formData.classeId}
@@ -311,35 +275,38 @@ export function AddScheduleModal({
                 required
               >
                 <option value="">Sélectionner une classe</option>
-                {classes.map(classe => (
+                {classes.map((classe) => (
                   <option key={classe.id} value={classe.id}>
                     {classe.nom_classe} ({classe.bloc}{classe.numclasse})
                   </option>
                 ))}
               </select>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Type de session
-              </label>
-              <select
-                value={formData.sessionType}
-                onChange={(e) => setFormData(prev => ({ ...prev, sessionType: e.target.value as any }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                required
-              >
-                <option value="cours">Cours</option>
-                <option value="td">TD</option>
-                <option value="tp">TP</option>
-                <option value="exam">Examen</option>
-              </select>
-            </div>
+          {/* Session Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <FileText className="w-4 h-4 inline mr-2" />
+              Type de session
+            </label>
+            <select
+              value={formData.sessionType}
+              onChange={(e) => setFormData(prev => ({ ...prev, sessionType: e.target.value as 'cours' | 'td' | 'tp' | 'exam' }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              required
+            >
+              <option value="cours">Cours</option>
+              <option value="td">Travaux Dirigés</option>
+              <option value="tp">Travaux Pratiques</option>
+              <option value="exam">Examen</option>
+            </select>
           </div>
 
           {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              <FileText className="w-4 h-4 inline mr-2" />
               Notes (optionnel)
             </label>
             <textarea
@@ -347,50 +314,26 @@ export function AddScheduleModal({
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              placeholder="Ajouter des notes ou commentaires..."
+              placeholder="Informations supplémentaires..."
             />
           </div>
 
-          {/* Day of Week Display */}
-          {formData.dayOfWeek && (
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm text-gray-600">
-                Jour de la semaine: <span className="font-medium capitalize">{formData.dayOfWeek}</span>
-              </span>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center space-x-4 pt-4 border-t border-gray-100">
+          {/* Submit Button */}
+          <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
               onClick={handleClose}
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               Annuler
             </button>
             <button
               type="submit"
-              disabled={loading || success}
-              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50"
+              disabled={loading}
+              className="px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Création...</span>
-                </>
-              ) : success ? (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  <span>Créé!</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4" />
-                  <span>Créer l'événement</span>
-                </>
-              )}
+              {loading ? 'Création...' : 'Créer l\'événement'}
             </button>
           </div>
         </form>

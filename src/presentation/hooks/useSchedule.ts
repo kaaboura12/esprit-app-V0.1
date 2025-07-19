@@ -5,8 +5,16 @@ import { useAuth } from './useAuth'
 
 // API service for schedule operations
 class ScheduleApiService {
+  // Helper method to format dates safely for API calls
+  private formatDateForAPI(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   async getSchedulesByWeek(weekStartDate: Date, teacherId?: number): Promise<ScheduleDTO[]> {
-    let url = `/api/schedule?type=week&weekStart=${weekStartDate.toISOString()}&_t=${Date.now()}`
+    let url = `/api/schedule?type=week&weekStart=${this.formatDateForAPI(weekStartDate)}&_t=${Date.now()}`
     if (teacherId) {
       url += `&teacherId=${teacherId}`
     }
@@ -19,7 +27,7 @@ class ScheduleApiService {
   }
 
   async getSchedulesByDate(date: Date): Promise<ScheduleDTO[]> {
-    const response = await fetch(`/api/schedule?type=date&date=${date.toISOString()}`)
+    const response = await fetch(`/api/schedule?type=date&date=${this.formatDateForAPI(date)}`)
     if (!response.ok) {
       throw new Error('Failed to fetch schedules')
     }
@@ -28,8 +36,8 @@ class ScheduleApiService {
 
   async getSchedulesByTeacher(teacherId: number, startDate?: Date, endDate?: Date): Promise<ScheduleDTO[]> {
     let url = `/api/schedule?type=teacher&teacherId=${teacherId}`
-    if (startDate) url += `&startDate=${startDate.toISOString()}`
-    if (endDate) url += `&endDate=${endDate.toISOString()}`
+    if (startDate) url += `&startDate=${this.formatDateForAPI(startDate)}`
+    if (endDate) url += `&endDate=${this.formatDateForAPI(endDate)}`
     
     const response = await fetch(url)
     if (!response.ok) {
@@ -40,8 +48,8 @@ class ScheduleApiService {
 
   async getSchedulesByClass(classeId: number, startDate?: Date, endDate?: Date): Promise<ScheduleDTO[]> {
     let url = `/api/schedule?type=class&classeId=${classeId}`
-    if (startDate) url += `&startDate=${startDate.toISOString()}`
-    if (endDate) url += `&endDate=${endDate.toISOString()}`
+    if (startDate) url += `&startDate=${this.formatDateForAPI(startDate)}`
+    if (endDate) url += `&endDate=${this.formatDateForAPI(endDate)}`
     
     const response = await fetch(url)
     if (!response.ok) {
@@ -52,8 +60,8 @@ class ScheduleApiService {
 
   async getSchedulesBySubject(matiereId: number, startDate?: Date, endDate?: Date): Promise<ScheduleDTO[]> {
     let url = `/api/schedule?type=subject&matiereId=${matiereId}`
-    if (startDate) url += `&startDate=${startDate.toISOString()}`
-    if (endDate) url += `&endDate=${endDate.toISOString()}`
+    if (startDate) url += `&startDate=${this.formatDateForAPI(startDate)}`
+    if (endDate) url += `&endDate=${this.formatDateForAPI(endDate)}`
     
     const response = await fetch(url)
     if (!response.ok) {
@@ -75,8 +83,8 @@ class ScheduleApiService {
 
   async getScheduleStats(startDate?: Date, endDate?: Date, teacherId?: number): Promise<any> {
     let url = `/api/schedule?type=stats&_t=${Date.now()}`
-    if (startDate) url += `&startDate=${startDate.toISOString()}`
-    if (endDate) url += `&endDate=${endDate.toISOString()}`
+    if (startDate) url += `&startDate=${this.formatDateForAPI(startDate)}`
+    if (endDate) url += `&endDate=${this.formatDateForAPI(endDate)}`
     if (teacherId) url += `&teacherId=${teacherId}`
     
     const response = await fetch(url)
@@ -142,6 +150,22 @@ export const useSchedule = () => {
   }
 
   /**
+   * Load all schedules for the teacher (or all if no teacher)
+   */
+  const loadAllSchedules = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const scheduleData = await apiService.getSchedulesByTeacher(teacher?.id!)
+      setSchedules(scheduleData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load schedules')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /**
    * Convert schedules to FullCalendar events
    */
   const getCalendarEvents = () => {
@@ -187,6 +211,7 @@ export const useSchedule = () => {
     loadSchedulesByDate,
     getCalendarEvents,
     getScheduleById,
-    loadStats
+    loadStats,
+    loadAllSchedules
   }
 } 

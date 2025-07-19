@@ -32,11 +32,11 @@ export class MySQLScheduleRepository implements ScheduleRepository {
          WHERE s.schedule_date BETWEEN ? AND ?
          AND s.is_cancelled = FALSE
          ORDER BY s.schedule_date, s.start_time`,
-        [weekStartDate.toISOString().split('T')[0], weekEndDate.toISOString().split('T')[0]]
+        [this.formatDateForDatabase(weekStartDate), this.formatDateForDatabase(weekEndDate)]
       )
 
       const schedules = rows as mysql.RowDataPacket[]
-      return schedules.map(this.mapRowToSchedule)
+      return schedules.map(row => this.mapRowToSchedule(row))
     } catch (error) {
       console.error('Error getting schedules by week:', error)
       throw new Error('Database error occurred while getting schedules')
@@ -58,11 +58,11 @@ export class MySQLScheduleRepository implements ScheduleRepository {
          WHERE s.schedule_date = ?
          AND s.is_cancelled = FALSE
          ORDER BY s.start_time`,
-        [date.toISOString().split('T')[0]]
+        [this.formatDateForDatabase(date)]
       )
 
       const schedules = rows as mysql.RowDataPacket[]
-      return schedules.map(this.mapRowToSchedule)
+      return schedules.map(row => this.mapRowToSchedule(row))
     } catch (error) {
       console.error('Error getting schedules by date:', error)
       throw new Error('Database error occurred while getting schedules')
@@ -87,19 +87,19 @@ export class MySQLScheduleRepository implements ScheduleRepository {
 
       if (startDate) {
         query += ' AND s.schedule_date >= ?'
-        params.push(startDate.toISOString().split('T')[0])
+        params.push(this.formatDateForDatabase(startDate))
       }
 
       if (endDate) {
         query += ' AND s.schedule_date <= ?'
-        params.push(endDate.toISOString().split('T')[0])
+        params.push(this.formatDateForDatabase(endDate))
       }
 
       query += ' ORDER BY s.schedule_date, s.start_time'
 
       const [rows] = await this.pool.execute(query, params)
       const schedules = rows as mysql.RowDataPacket[]
-      return schedules.map(this.mapRowToSchedule)
+      return schedules.map(row => this.mapRowToSchedule(row))
     } catch (error) {
       console.error('Error getting schedules by teacher:', error)
       throw new Error('Database error occurred while getting schedules')
@@ -124,19 +124,19 @@ export class MySQLScheduleRepository implements ScheduleRepository {
 
       if (startDate) {
         query += ' AND s.schedule_date >= ?'
-        params.push(startDate.toISOString().split('T')[0])
+        params.push(this.formatDateForDatabase(startDate))
       }
 
       if (endDate) {
         query += ' AND s.schedule_date <= ?'
-        params.push(endDate.toISOString().split('T')[0])
+        params.push(this.formatDateForDatabase(endDate))
       }
 
       query += ' ORDER BY s.schedule_date, s.start_time'
 
       const [rows] = await this.pool.execute(query, params)
       const schedules = rows as mysql.RowDataPacket[]
-      return schedules.map(this.mapRowToSchedule)
+      return schedules.map(row => this.mapRowToSchedule(row))
     } catch (error) {
       console.error('Error getting schedules by class:', error)
       throw new Error('Database error occurred while getting schedules')
@@ -161,19 +161,19 @@ export class MySQLScheduleRepository implements ScheduleRepository {
 
       if (startDate) {
         query += ' AND s.schedule_date >= ?'
-        params.push(startDate.toISOString().split('T')[0])
+        params.push(this.formatDateForDatabase(startDate))
       }
 
       if (endDate) {
         query += ' AND s.schedule_date <= ?'
-        params.push(endDate.toISOString().split('T')[0])
+        params.push(this.formatDateForDatabase(endDate))
       }
 
       query += ' ORDER BY s.schedule_date, s.start_time'
 
       const [rows] = await this.pool.execute(query, params)
       const schedules = rows as mysql.RowDataPacket[]
-      return schedules.map(this.mapRowToSchedule)
+      return schedules.map(row => this.mapRowToSchedule(row))
     } catch (error) {
       console.error('Error getting schedules by subject:', error)
       throw new Error('Database error occurred while getting schedules')
@@ -213,17 +213,16 @@ export class MySQLScheduleRepository implements ScheduleRepository {
     try {
       const [result] = await this.pool.execute(
         `INSERT INTO schedule (
-          teacher_id, matiere_id, classe_id, day_of_week, 
+          teacher_id, matiere_id, classe_id, 
           schedule_date, week_start_date, start_time, end_time, 
           session_type, notes, is_cancelled
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           schedule.getTeacherId(),
           schedule.getMatiereId(),
           schedule.getClasseId(),
-          schedule.getDayOfWeek(),
-          schedule.getScheduleDate().toISOString().split('T')[0],
-          schedule.getWeekStartDate().toISOString().split('T')[0],
+          this.formatDateForDatabase(schedule.getScheduleDate()),
+          this.formatDateForDatabase(schedule.getWeekStartDate()),
           schedule.getStartTime(),
           schedule.getEndTime(),
           schedule.getSessionType(),
@@ -337,7 +336,7 @@ export class MySQLScheduleRepository implements ScheduleRepository {
            (s.classe_id = ? AND s.start_time < ? AND s.end_time > ?)
          )`,
         [
-          schedule.getScheduleDate().toISOString().split('T')[0],
+          this.formatDateForDatabase(schedule.getScheduleDate()),
           schedule.getId(),
           schedule.getTeacherId(),
           schedule.getEndTime(),
@@ -349,7 +348,7 @@ export class MySQLScheduleRepository implements ScheduleRepository {
       )
 
       const conflicts = rows as mysql.RowDataPacket[]
-      return conflicts.map(this.mapRowToSchedule)
+      return conflicts.map(row => this.mapRowToSchedule(row))
     } catch (error) {
       console.error('Error checking schedule conflicts:', error)
       throw new Error('Database error occurred while checking conflicts')
@@ -381,12 +380,12 @@ export class MySQLScheduleRepository implements ScheduleRepository {
 
       if (startDate) {
         query += ' AND schedule_date >= ?'
-        params.push(startDate.toISOString().split('T')[0])
+        params.push(this.formatDateForDatabase(startDate))
       }
 
       if (endDate) {
         query += ' AND schedule_date <= ?'
-        params.push(endDate.toISOString().split('T')[0])
+        params.push(this.formatDateForDatabase(endDate))
       }
 
       if (teacherId) {
@@ -413,19 +412,58 @@ export class MySQLScheduleRepository implements ScheduleRepository {
   }
 
   /**
+   * Find class ID by class name (nom_classe)
+   */
+  async findClasseIdByName(nomClasse: string): Promise<number | null> {
+    try {
+      const [rows] = await this.pool.execute(
+        'SELECT id FROM classe WHERE nom_classe = ? LIMIT 1',
+        [nomClasse]
+      )
+      const result = rows as mysql.RowDataPacket[]
+      if (result.length > 0) {
+        return result[0].id
+      }
+      return null
+    } catch (error) {
+      console.error('Error finding class by name:', error)
+      return null
+    }
+  }
+
+  /**
+   * Find subject ID by subject name (nommatiere)
+   */
+  async findMatiereIdByName(nomMatiere: string): Promise<number | null> {
+    try {
+      const [rows] = await this.pool.execute(
+        'SELECT id FROM matiere WHERE nommatiere = ? LIMIT 1',
+        [nomMatiere]
+      )
+      const result = rows as mysql.RowDataPacket[]
+      if (result.length > 0) {
+        return result[0].id
+      }
+      return null
+    } catch (error) {
+      console.error('Error finding subject by name:', error)
+      return null
+    }
+  }
+
+  /**
    * Map database row to Schedule entity
    */
   private mapRowToSchedule(row: mysql.RowDataPacket): Schedule {
-    // Handle MySQL date/time properly
-    const scheduleDate = new Date(row.schedule_date)
-    const weekStartDate = new Date(row.week_start_date)
+    // Handle MySQL date/time properly - create timezone-safe dates
+    const scheduleDate = this.parseDateFromDatabase(row.schedule_date)
+    const weekStartDate = this.parseDateFromDatabase(row.week_start_date)
     
     const schedule = Schedule.create(
       row.id,
       row.teacher_id,
       row.matiere_id,
       row.classe_id,
-      row.day_of_week,
       scheduleDate,
       weekStartDate,
       row.start_time,
@@ -444,5 +482,42 @@ export class MySQLScheduleRepository implements ScheduleRepository {
     ;(schedule as any).classroom = row.classroom
     
     return schedule
+  }
+
+  /**
+   * Parse date from database - timezone safe
+   */
+  private parseDateFromDatabase(dateInput: string | Date): Date {
+    // Handle both string and Date object inputs from MySQL
+    if (dateInput instanceof Date) {
+      // If it's already a Date object, extract the local date components
+      const year = dateInput.getFullYear()
+      const month = dateInput.getMonth()
+      const day = dateInput.getDate()
+      // Create date at noon UTC to avoid timezone shifts
+      return new Date(Date.UTC(year, month, day, 12, 0, 0, 0))
+    }
+    
+    // If it's a string, parse YYYY-MM-DD format directly
+    if (typeof dateInput === 'string') {
+      const [year, month, day] = dateInput.split('-').map(Number)
+      // Create date at noon UTC to avoid timezone shifts
+      return new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0))
+    }
+    
+    // Fallback for unexpected types
+    console.warn('Unexpected date input type:', typeof dateInput, dateInput)
+    return new Date(dateInput)
+  }
+
+  /**
+   * Format date for database storage - timezone safe
+   */
+  private formatDateForDatabase(date: Date): string {
+    // Use local date components to avoid timezone shifts
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
 } 

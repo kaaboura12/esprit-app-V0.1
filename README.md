@@ -47,6 +47,64 @@ Download the template from the import modal or create an Excel file with the fol
 - **Duplicate Handling** - Option to skip or overwrite existing students
 - **Batch Processing** - Processes large files in batches for optimal performance
 
+## 📄 PDF Schedule Import Feature
+
+### Overview
+The PDF import feature allows teachers to extract schedule data from PDF files containing timetable information. The system uses a Python script with pdfplumber to parse PDF tables and extract structured schedule data.
+
+### Supported File Format
+- **File Types**: .pdf
+- **Max File Size**: 10MB
+- **Expected Format**: PDF with tables containing schedule information
+- **Table Structure**: 
+  - Column 1: Day and Date
+  - Column 2+: Time slots with subject, class, and room information
+
+### Features
+- **Drag & Drop Interface** - Modern file upload with drag-and-drop support
+- **PDF Table Extraction** - Automatically extracts table data from PDF files
+- **Data Visualization** - Displays extracted schedule data in a structured format
+- **Error Handling** - Graceful fallback to mock data if Python script fails
+- **Real-time Processing** - Shows extraction progress and results immediately
+
+### Setup Requirements
+1. **Python Dependencies**: Install required Python packages
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Python Script**: The `extract_schedule.py` script must be in the project root
+   - Uses pdfplumber library for PDF processing
+   - Extracts table data and converts to JSON format
+   - Handles various PDF table structures
+
+3. **API Integration**: The system calls the Python script via Node.js child process
+   - Uploads PDF to server
+   - Calls Python script to extract data
+   - Returns structured JSON response
+   - Falls back to mock data if extraction fails
+
+### Expected PDF Structure
+The PDF should contain tables with the following structure:
+```
+| Day/Date    | Morning (8:00-12:00) | Afternoon (14:00-18:00) |
+|-------------|----------------------|-------------------------|
+| Lundi       | 08:00-10:00          | 14:00-16:00            |
+| 15/01/2024  | Mathématiques        | Informatique           |
+|             | 3A55                 | 3A55                   |
+|             | Salle 101            | Salle Info 1           |
+```
+
+### Extracted Data Format
+The system extracts and displays:
+- **Day**: Day of the week (Lundi, Mardi, etc.)
+- **Date**: Date in DD/MM/YYYY format
+- **Events**: Array of schedule events containing:
+  - **Time**: Time slot (e.g., "08:00-10:00")
+  - **Subject**: Course name (e.g., "Mathématiques")
+  - **Class**: Class identifier (e.g., "3A55")
+  - **Room**: Classroom location (e.g., "Salle 101")
+
 ### Usage
 1. Navigate to the Student Management page (`/gestion-etudiants`)
 2. Select a class from the classroom management page

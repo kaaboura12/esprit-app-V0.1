@@ -1,18 +1,20 @@
-import { ScheduleRepository } from '../../core/interfaces/ScheduleRepository'
-import { Schedule } from '../../core/entities/Schedule'
-import { ScheduleDTO } from '../dtos/ScheduleDTO'
+import { ScheduleRepository } from "../../core/interfaces/ScheduleRepository"
+import { Schedule } from "../../core/entities/Schedule"
+import { ScheduleDTO } from "../dtos/ScheduleDTO"
 
+/**
+ * Get Schedules Use Case - Application layer
+ * This use case handles retrieving schedules and converting them to DTOs
+ */
 export class GetSchedulesUseCase {
-  constructor(
-    private readonly scheduleRepository: ScheduleRepository
-  ) {}
+  constructor(private scheduleRepository: ScheduleRepository) {}
 
   /**
    * Get schedules for a specific week
    */
   async getSchedulesByWeek(weekStartDate: Date): Promise<ScheduleDTO[]> {
     const schedules = await this.scheduleRepository.getSchedulesByWeek(weekStartDate)
-    return schedules.map(this.mapToDTO)
+    return schedules.map(schedule => this.convertToDTO(schedule))
   }
 
   /**
@@ -20,39 +22,42 @@ export class GetSchedulesUseCase {
    */
   async getSchedulesByDate(date: Date): Promise<ScheduleDTO[]> {
     const schedules = await this.scheduleRepository.getSchedulesByDate(date)
-    return schedules.map(this.mapToDTO)
+    return schedules.map(schedule => this.convertToDTO(schedule))
   }
 
   /**
-   * Get schedules for a teacher
+   * Get schedules for a specific teacher
    */
   async getSchedulesByTeacher(teacherId: number, startDate?: Date, endDate?: Date): Promise<ScheduleDTO[]> {
     const schedules = await this.scheduleRepository.getSchedulesByTeacher(teacherId, startDate, endDate)
-    return schedules.map(this.mapToDTO)
+    return schedules.map(schedule => this.convertToDTO(schedule))
   }
 
   /**
-   * Get schedules for a class
+   * Get schedules for a specific class
    */
   async getSchedulesByClass(classeId: number, startDate?: Date, endDate?: Date): Promise<ScheduleDTO[]> {
     const schedules = await this.scheduleRepository.getSchedulesByClass(classeId, startDate, endDate)
-    return schedules.map(this.mapToDTO)
+    return schedules.map(schedule => this.convertToDTO(schedule))
   }
 
   /**
-   * Get schedules for a subject
+   * Get schedules for a specific subject
    */
   async getSchedulesBySubject(matiereId: number, startDate?: Date, endDate?: Date): Promise<ScheduleDTO[]> {
     const schedules = await this.scheduleRepository.getSchedulesBySubject(matiereId, startDate, endDate)
-    return schedules.map(this.mapToDTO)
+    return schedules.map(schedule => this.convertToDTO(schedule))
   }
 
   /**
-   * Get schedule by ID
+   * Get a specific schedule by ID
    */
   async getScheduleById(id: number): Promise<ScheduleDTO | null> {
     const schedule = await this.scheduleRepository.getScheduleById(id)
-    return schedule ? this.mapToDTO(schedule) : null
+    if (!schedule) {
+      return null
+    }
+    return this.convertToDTO(schedule)
   }
 
   /**
@@ -63,25 +68,24 @@ export class GetSchedulesUseCase {
   }
 
   /**
-   * Convert Schedule entity to DTO
+   * Convert Schedule entity to ScheduleDTO
    */
-  private mapToDTO(schedule: Schedule): ScheduleDTO {
+  private convertToDTO(schedule: Schedule): ScheduleDTO {
     return {
       id: schedule.getId(),
       teacherId: schedule.getTeacherId(),
       matiereId: schedule.getMatiereId(),
       classeId: schedule.getClasseId(),
-      dayOfWeek: schedule.getDayOfWeek() as 'lundi' | 'mardi' | 'mercredi' | 'jeudi' | 'vendredi' | 'samedi' | 'dimanche',
-      scheduleDate: schedule.getScheduleDate().toISOString(),
-      weekStartDate: schedule.getWeekStartDate().toISOString(),
+      scheduleDate: schedule.getScheduleDate().toISOString().split('T')[0], // Format as YYYY-MM-DD
+      weekStartDate: schedule.getWeekStartDate().toISOString().split('T')[0], // Format as YYYY-MM-DD
       startTime: schedule.getStartTime(),
       endTime: schedule.getEndTime(),
       sessionType: schedule.getSessionType() as 'cours' | 'td' | 'tp' | 'exam',
       notes: schedule.getNotes(),
       isCancelled: schedule.getIsCancelled(),
-      createdAt: schedule.getCreatedAt()?.toISOString(),
-      updatedAt: schedule.getUpdatedAt()?.toISOString(),
-      // These will be populated by the repository query joins
+      createdAt: schedule.getCreatedAt()?.toISOString().split('T')[0],
+      updatedAt: schedule.getUpdatedAt()?.toISOString().split('T')[0],
+      // Additional display fields from joins (if available)
       teacherName: (schedule as any).teacherName,
       matiereNom: (schedule as any).matiereNom,
       classeNom: (schedule as any).classeNom,
@@ -92,68 +96,32 @@ export class GetSchedulesUseCase {
   /**
    * Convert ScheduleDTO to FullCalendar event format
    */
-  static toCalendarEvent(schedule: ScheduleDTO): {
-    id: string
-    title: string
-    start: string
-    end: string
-    backgroundColor: string
-    borderColor: string
-    textColor: string
-    extendedProps: {
-      teacher: string
-      classroom: string
-      students: number
-      department: string
-      type: string
-      description?: string
-      classeNom: string
-    }
-  } {
-    // Handle date properly - use local date instead of UTC
-    const scheduleDate = new Date(schedule.scheduleDate)
-    const year = scheduleDate.getFullYear()
-    const month = String(scheduleDate.getMonth() + 1).padStart(2, '0')
-    const day = String(scheduleDate.getDate()).padStart(2, '0')
-    const date = `${year}-${month}-${day}`
+  static toCalendarEvent(schedule: ScheduleDTO): any {
+    // Create date strings directly to avoid timezone issues
+    const startDateTime = `${schedule.scheduleDate}T${schedule.startTime}`
+    const endDateTime = `${schedule.scheduleDate}T${schedule.endTime}`
     
-    // Color mapping based on session type
-    const colors = {
-      cours: { bg: '#ef4444', border: '#dc2626' },
-      td: { bg: '#1f2937', border: '#111827' },
-      tp: { bg: '#059669', border: '#047857' },
-      exam: { bg: '#dc2626', border: '#b91c1c' }
-    }
-    
-    const color = colors[schedule.sessionType] || colors.cours
-    
-    // Create a more informative title that includes class and classroom
-    const matiereName = schedule.matiereNom || `Matière ${schedule.matiereId}`
-    const classeName = schedule.classeNom || `Classe ${schedule.classeId}`
-    const classroom = schedule.classroom || 'Salle non définie'
-    
-    // Format the title to show: Subject - Class (Classroom)
-    const title = `${matiereName} - ${classeName} (${classroom})`
-    
-    const event = {
+    return {
       id: schedule.id.toString(),
-      title: title,
-      start: `${date}T${schedule.startTime}`,
-      end: `${date}T${schedule.endTime}`,
-      backgroundColor: color.bg,
-      borderColor: color.border,
-      textColor: '#ffffff',
+      title: `${schedule.matiereNom || 'Unknown Subject'} - ${schedule.sessionType.toUpperCase()}`,
+      start: startDateTime,
+      end: endDateTime,
       extendedProps: {
-        teacher: schedule.teacherName || `Enseignant ${schedule.teacherId}`,
-        classroom: classroom,
-        students: 0, // This would need to be fetched from class info
-        department: 'Département', // This would need to be fetched from teacher/subject info
-        type: schedule.sessionType,
-        description: schedule.notes,
-        classeNom: classeName
-      }
+        teacherName: schedule.teacherName,
+        classeNom: schedule.classeNom,
+        classroom: schedule.classroom,
+        notes: schedule.notes,
+        isCancelled: schedule.isCancelled,
+        sessionType: schedule.sessionType
+      },
+      backgroundColor: schedule.isCancelled ? '#ff6b6b' : 
+                      schedule.sessionType === 'cours' ? '#4ecdc4' :
+                      schedule.sessionType === 'td' ? '#45b7d1' :
+                      schedule.sessionType === 'tp' ? '#96ceb4' : '#feca57',
+      borderColor: schedule.isCancelled ? '#ff5252' : 
+                   schedule.sessionType === 'cours' ? '#26a69a' :
+                   schedule.sessionType === 'td' ? '#1976d2' :
+                   schedule.sessionType === 'tp' ? '#66bb6a' : '#ff9800'
     }
-    
-    return event
   }
 } 

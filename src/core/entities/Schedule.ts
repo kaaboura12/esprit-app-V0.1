@@ -8,7 +8,6 @@ export class Schedule {
     private readonly teacherId: number,
     private readonly matiereId: number,
     private readonly classeId: number,
-    private readonly dayOfWeek: 'lundi' | 'mardi' | 'mercredi' | 'jeudi' | 'vendredi' | 'samedi' | 'dimanche',
     private readonly scheduleDate: Date,
     private readonly weekStartDate: Date,
     private readonly startTime: string, // Format: HH:MM
@@ -21,9 +20,6 @@ export class Schedule {
   ) {
     // Validate time order
     this.validateTimeOrder()
-    
-    // Validate day of week matches schedule date
-    this.validateDayOfWeek()
     
     // Note: We don't validate schedule date here to allow past schedules for viewing
   }
@@ -42,10 +38,6 @@ export class Schedule {
 
   getClasseId(): number {
     return this.classeId
-  }
-
-  getDayOfWeek(): string {
-    return this.dayOfWeek
   }
 
   getScheduleDate(): Date {
@@ -159,7 +151,6 @@ export class Schedule {
       this.teacherId,
       this.matiereId,
       this.classeId,
-      this.dayOfWeek,
       this.scheduleDate,
       this.weekStartDate,
       this.startTime,
@@ -181,18 +172,6 @@ export class Schedule {
     
     if (endMinutes <= startMinutes) {
       throw new Error('End time must be after start time')
-    }
-  }
-
-  /**
-   * Business rule: Day of week must match the schedule date
-   */
-  private validateDayOfWeek(): void {
-    const dayNames = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi']
-    const actualDay = dayNames[this.scheduleDate.getDay()]
-    
-    if (this.dayOfWeek !== actualDay) {
-      throw new Error(`Day of week '${this.dayOfWeek}' does not match the schedule date (${actualDay})`)
     }
   }
 
@@ -238,7 +217,6 @@ export class Schedule {
     teacherId: number,
     matiereId: number,
     classeId: number,
-    dayOfWeek: 'lundi' | 'mardi' | 'mercredi' | 'jeudi' | 'vendredi' | 'samedi' | 'dimanche',
     scheduleDate: Date,
     weekStartDate: Date,
     startTime: string,
@@ -254,7 +232,6 @@ export class Schedule {
       teacherId,
       matiereId,
       classeId,
-      dayOfWeek,
       scheduleDate,
       weekStartDate,
       startTime,

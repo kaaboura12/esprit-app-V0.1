@@ -1,13 +1,15 @@
 "use client"
 
 import { useSchedule } from "@/presentation/hooks/useSchedule"
+import { useAuth } from "@/presentation/hooks/useAuth"
 import { AddScheduleModal } from "@/presentation/components/AddScheduleModal"
+import { PdfImportModal } from "@/presentation/components/PdfImportModal"
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { 
   Calendar, 
   Plus, 
@@ -21,8 +23,10 @@ import {
   Edit3,
   Trash2,
   X,
-  Loader2
+  Loader2,
+  FileText
 } from 'lucide-react'
+import { ExtractedSchedule } from "@/infrastructure/services/PDFImportService"
 
 interface ScheduleEvent {
   id: string
@@ -50,9 +54,13 @@ export default function GestionEmploisPage() {
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null)
   const [isEventDetailsModalOpen, setIsEventDetailsModalOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [isPdfImportModalOpen, setIsPdfImportModalOpen] = useState(false)
 
   // Use the schedule hook to get dynamic data
-  const { schedules, loading, error, stats, getCalendarEvents, getScheduleById, loadSchedulesByWeek, loadStats } = useSchedule()
+  const { schedules, loading, error, stats, getCalendarEvents, getScheduleById, loadSchedulesByWeek, loadStats, loadAllSchedules } = useSchedule()
+  
+  // Use the auth hook to get the logged-in teacher
+  const { teacher } = useAuth()
   
   // Convert schedules to calendar events
   const events = getCalendarEvents()
@@ -75,6 +83,17 @@ export default function GestionEmploisPage() {
   }))
 
   const allEvents = [...events, ...pauseEvents]
+
+  // Debug: Log all events
+  console.log('All calendar events:', allEvents)
+
+  // Load all schedules on mount
+  useEffect(() => {
+    if (teacher) {
+      loadAllSchedules()
+      loadStats()
+    }
+  }, [teacher])
 
   const handleDateSelect = (selectInfo: any) => {
     setSelectedDate(new Date(selectInfo.start))
@@ -139,6 +158,15 @@ export default function GestionEmploisPage() {
     }
   }
 
+  const handlePdfScheduleImported = (schedule: ExtractedSchedule) => {
+    // Refresh the calendar data after import
+    const currentWeek = new Date()
+    const startOfWeek = new Date(currentWeek)
+    startOfWeek.setDate(currentWeek.getDate() - currentWeek.getDay() + 1)
+    loadSchedulesByWeek(startOfWeek)
+    loadStats()
+  }
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
@@ -172,9 +200,12 @@ export default function GestionEmploisPage() {
                   <Download className="w-4 h-4 text-[#6b7280]" />
                   <span className="font-medium text-[#374151]">Exporter</span>
                 </button>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#e5e7eb] rounded-xl hover:shadow-md transition-all duration-300">
-                  <Upload className="w-4 h-4 text-[#6b7280]" />
-                  <span className="font-medium text-[#374151]">Importer</span>
+                <button 
+                  onClick={() => setIsPdfImportModalOpen(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#e5e7eb] rounded-xl hover:shadow-md transition-all duration-300"
+                >
+                  <FileText className="w-4 h-4 text-[#6b7280]" />
+                  <span className="font-medium text-[#374151]">Importer PDF</span>
                 </button>
               </div>
             </div>
@@ -367,6 +398,7 @@ export default function GestionEmploisPage() {
                     eventClick={handleEventClick}
                     height="auto"
                     locale="fr"
+                    timeZone="local"
                     slotMinTime="08:00:00"
                     slotMaxTime="18:00:00"
                     allDaySlot={false}
@@ -461,56 +493,15 @@ export default function GestionEmploisPage() {
                     <span>{selectedEvent.extendedProps?.classroom}</span>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Étudiants</label>
-                  <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
-                    <Users className="w-4 h-4 text-gray-500" />
-                    <span>{selectedEvent.extendedProps?.students} étudiants</span>
-                  </div>
-                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Département</label>
-                  <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
-                    <BookOpen className="w-4 h-4 text-gray-500" />
-                    <span>{selectedEvent.extendedProps?.department}</span>
-                  </div>
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Type de Session</label>
                   <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                     {getEventTypeIcon(selectedEvent.extendedProps?.type || 'cours')}
                     <span>{getEventTypeLabel(selectedEvent.extendedProps?.type || 'cours')}</span>
                   </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Horaires</label>
-                <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span>
-                    {new Date(selectedEvent.start).toLocaleDateString('fr-FR', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </span>
-                  <span>•</span>
-                  <span>
-                    {new Date(selectedEvent.start).toLocaleTimeString('fr-FR', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })} - {new Date(selectedEvent.end).toLocaleTimeString('fr-FR', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
                 </div>
               </div>
 
@@ -554,6 +545,14 @@ export default function GestionEmploisPage() {
           loadStats()
         }}
         selectedDate={selectedDate}
+      />
+
+      {/* PDF Import Modal */}
+      <PdfImportModal
+        isOpen={isPdfImportModalOpen}
+        onClose={() => setIsPdfImportModalOpen(false)}
+        onScheduleImported={handlePdfScheduleImported}
+        teacherId={teacher?.id}
       />
 
       <style jsx global>{`

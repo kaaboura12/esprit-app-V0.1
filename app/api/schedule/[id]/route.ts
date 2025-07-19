@@ -7,10 +7,11 @@ const getSchedulesUseCase = new GetSchedulesUseCase(scheduleRepository)
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id: idParam } = await params
+    const id = parseInt(idParam)
     
     if (isNaN(id)) {
       return NextResponse.json({ error: 'Invalid schedule ID' }, { status: 400 })
