@@ -1,47 +1,34 @@
 import { TeacherRepository } from "@/core/interfaces/TeacherRepository"
 import { Teacher } from "@/core/entities/Teacher"
 import { Email } from "@/core/value-objects/Email"
-import { getConnectionPool } from "@/infrastructure/config/database"
-import mysql from 'mysql2/promise'
+import { supabase } from "@/infrastructure/config/database"
 
 /**
- * MySQL Teacher Repository Implementation - Infrastructure layer
- * This implements the TeacherRepository interface with MySQL database storage
+ * Supabase Teacher Repository Implementation - Infrastructure layer
+ * This implements the TeacherRepository interface with Supabase database storage
  */
 export class MySQLTeacherRepository implements TeacherRepository {
-  private pool: mysql.Pool
-
-  constructor() {
-    this.pool = getConnectionPool()
-  }
+  // No constructor needed for Supabase
 
   async findById(id: number): Promise<Teacher | null> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, departement, motdepasse, photo_url FROM teacher WHERE id = ? AND is_active = 1',
-        [id]
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url')
+        .eq('id', id)
+        .eq('is_active', 1)
+        .maybeSingle()
+      if (error) throw error
+      if (!data) return null
+      return new Teacher(
+        data.id,
+        data.firstname,
+        data.lastname,
+        new Email(data.email),
+        data.departement,
+        data.motdepasse,
+        data.photo_url
       )
-
-      const teachers = rows as mysql.RowDataPacket[]
-      
-      if (teachers.length === 0) {
-        return null
-      }
-
-      const teacherData = teachers[0]
-      
-      const teacher = new Teacher(
-        teacherData.id,
-        teacherData.firstname,
-        teacherData.lastname,
-        new Email(teacherData.email),
-        teacherData.departement,
-        teacherData.motdepasse,
-        teacherData.photo_url
-      )
-
-      return teacher
-
     } catch (error) {
       console.error('Error finding teacher by ID:', error)
       throw new Error('Database error occurred while finding teacher')
@@ -51,32 +38,23 @@ export class MySQLTeacherRepository implements TeacherRepository {
   async findByEmail(email: string): Promise<Teacher | null> {
     try {
       const emailVO = new Email(email)
-      
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, departement, motdepasse, photo_url FROM teacher WHERE email = ? AND is_active = 1',
-        [emailVO.getValue()]
-      )
-
-      const teachers = rows as mysql.RowDataPacket[]
-      
-      if (teachers.length === 0) {
-        return null
-      }
-
-      const teacherData = teachers[0]
-      
-      const teacher = new Teacher(
-        teacherData.id,
-        teacherData.firstname,
-        teacherData.lastname,
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url')
+        .eq('email', emailVO.getValue())
+        .eq('is_active', 1)
+        .maybeSingle()
+      if (error) throw error
+      if (!data) return null
+      return new Teacher(
+        data.id,
+        data.firstname,
+        data.lastname,
         emailVO,
-        teacherData.departement,
-        teacherData.motdepasse,
-        teacherData.photo_url
+        data.departement,
+        data.motdepasse,
+        data.photo_url
       )
-
-      return teacher
-
     } catch (error) {
       console.error('Error finding teacher by email:', error)
       throw new Error('Database error occurred while finding teacher')
@@ -87,42 +65,50 @@ export class MySQLTeacherRepository implements TeacherRepository {
     try {
       // Check if teacher exists
       const existingTeacher = await this.findById(teacher.getId())
-      
       if (existingTeacher) {
         // Update existing teacher
-        await this.pool.execute(
-          'UPDATE teacher SET firstname = ?, lastname = ?, email = ?, departement = ?, motdepasse = ?, photo_url = ?, updated_at = NOW() WHERE id = ?',
-          [
-            teacher.getFirstname(),
-            teacher.getLastname(),
-            teacher.getEmailValue(),
-            teacher.getDepartement(),
-            teacher.getHashedPassword(),
-            teacher.getPhotoUrl(),
-            teacher.getId()
-          ]
-        )
+        const { error } = await supabase
+          .from('teacher')
+          .update({
+            firstname: teacher.getFirstname(),
+            lastname: teacher.getLastname(),
+            email: teacher.getEmailValue(),
+            departement: teacher.getDepartement(),
+            motdepasse: teacher.getHashedPassword(),
+            photo_url: teacher.getPhotoUrl(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', teacher.getId())
+        if (error) {
+          if (error.code === '23505' || error.message.includes('duplicate')) {
+            throw new Error('A teacher with this email already exists')
+          }
+          throw error
+        }
       } else {
-        // Insert new teacher (this might not work as ID is auto-increment)
-        await this.pool.execute(
-          'INSERT INTO teacher (id, firstname, lastname, email, departement, motdepasse, photo_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [
-            teacher.getId(),
-            teacher.getFirstname(),
-            teacher.getLastname(),
-            teacher.getEmailValue(),
-            teacher.getDepartement(),
-            teacher.getHashedPassword(),
-            teacher.getPhotoUrl()
-          ]
-        )
+        // Insert new teacher (ID is auto-increment, so don't provide it)
+        const { error } = await supabase
+          .from('teacher')
+          .insert([
+            {
+              firstname: teacher.getFirstname(),
+              lastname: teacher.getLastname(),
+              email: teacher.getEmailValue(),
+              departement: teacher.getDepartement(),
+              motdepasse: teacher.getHashedPassword(),
+              photo_url: teacher.getPhotoUrl(),
+              is_active: 1
+            }
+          ])
+        if (error) {
+          if (error.code === '23505' || error.message.includes('duplicate')) {
+            throw new Error('A teacher with this email already exists')
+          }
+          throw error
+        }
       }
-
     } catch (error) {
       console.error('Error saving teacher:', error)
-      if ((error as any).code === 'ER_DUP_ENTRY') {
-        throw new Error('A teacher with this email already exists')
-      }
       throw new Error('Database error occurred while saving teacher')
     }
   }
@@ -130,11 +116,11 @@ export class MySQLTeacherRepository implements TeacherRepository {
   async delete(id: number): Promise<void> {
     try {
       // Soft delete by setting is_active to 0
-      await this.pool.execute(
-        'UPDATE teacher SET is_active = 0, updated_at = NOW() WHERE id = ?',
-        [id]
-      )
-
+      const { error } = await supabase
+        .from('teacher')
+        .update({ is_active: 0, updated_at: new Date().toISOString() })
+        .eq('id', id)
+      if (error) throw error
     } catch (error) {
       console.error('Error deleting teacher:', error)
       throw new Error('Database error occurred while deleting teacher')
@@ -143,13 +129,15 @@ export class MySQLTeacherRepository implements TeacherRepository {
 
   async findAll(): Promise<Teacher[]> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, departement, motdepasse, photo_url FROM teacher WHERE is_active = 1 ORDER BY lastname, firstname'
-      )
-
-      const teachers = rows as mysql.RowDataPacket[]
-      
-      return teachers.map(teacherData => new Teacher(
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url')
+        .eq('is_active', 1)
+        .order('lastname', { ascending: true })
+        .order('firstname', { ascending: true })
+      if (error) throw error
+      if (!data) return []
+      return data.map(teacherData => new Teacher(
         teacherData.id,
         teacherData.firstname,
         teacherData.lastname,
@@ -158,7 +146,6 @@ export class MySQLTeacherRepository implements TeacherRepository {
         teacherData.motdepasse,
         teacherData.photo_url
       ))
-
     } catch (error) {
       console.error('Error getting all teachers:', error)
       throw new Error('Database error occurred while fetching teachers')
@@ -167,14 +154,16 @@ export class MySQLTeacherRepository implements TeacherRepository {
 
   async findByDepartement(departement: string): Promise<Teacher[]> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, departement, motdepasse, photo_url FROM teacher WHERE departement = ? AND is_active = 1 ORDER BY lastname, firstname',
-        [departement]
-      )
-
-      const teachers = rows as mysql.RowDataPacket[]
-      
-      return teachers.map(teacherData => new Teacher(
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url')
+        .eq('departement', departement)
+        .eq('is_active', 1)
+        .order('lastname', { ascending: true })
+        .order('firstname', { ascending: true })
+      if (error) throw error
+      if (!data) return []
+      return data.map(teacherData => new Teacher(
         teacherData.id,
         teacherData.firstname,
         teacherData.lastname,
@@ -183,7 +172,6 @@ export class MySQLTeacherRepository implements TeacherRepository {
         teacherData.motdepasse,
         teacherData.photo_url
       ))
-
     } catch (error) {
       console.error('Error finding teachers by department:', error)
       throw new Error('Database error occurred while finding teachers by department')
@@ -192,11 +180,12 @@ export class MySQLTeacherRepository implements TeacherRepository {
 
   async updatePhoto(teacherId: number, photoUrl: string): Promise<void> {
     try {
-      await this.pool.execute(
-        'UPDATE teacher SET photo_url = ?, updated_at = NOW() WHERE id = ? AND is_active = 1',
-        [photoUrl, teacherId]
-      )
-
+      const { error } = await supabase
+        .from('teacher')
+        .update({ photo_url: photoUrl, updated_at: new Date().toISOString() })
+        .eq('id', teacherId)
+        .eq('is_active', 1)
+      if (error) throw error
     } catch (error) {
       console.error('Error updating teacher photo:', error)
       throw new Error('Database error occurred while updating teacher photo')
@@ -204,17 +193,19 @@ export class MySQLTeacherRepository implements TeacherRepository {
   }
 
   // Additional helper methods
-  
+
   async getDepartements(): Promise<string[]> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT DISTINCT departement FROM teacher WHERE is_active = 1 ORDER BY departement'
-      )
-
-      const departments = rows as mysql.RowDataPacket[]
-      
-      return departments.map(row => row.departement)
-
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('departement')
+        .eq('is_active', 1)
+        .order('departement', { ascending: true })
+      if (error) throw error
+      if (!data) return []
+      // Remove duplicates
+      const uniqueDepartments = Array.from(new Set(data.map(row => row.departement)))
+      return uniqueDepartments
     } catch (error) {
       console.error('Error getting departments:', error)
       throw new Error('Database error occurred while fetching departments')
@@ -224,25 +215,27 @@ export class MySQLTeacherRepository implements TeacherRepository {
   async getTeacherStats(): Promise<{ total: number, byDepartment: { [key: string]: number } }> {
     try {
       // Get total count
-      const [totalRows] = await this.pool.execute(
-        'SELECT COUNT(*) as total FROM teacher WHERE is_active = 1'
-      )
-      const total = (totalRows as mysql.RowDataPacket[])[0].total
+      const { data: totalRows, error: totalError } = await supabase
+        .from('teacher')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_active', 1)
+      if (totalError) throw totalError
+      const total = totalRows?.length || 0
 
       // Get count by department
-      const [deptRows] = await this.pool.execute(
-        'SELECT departement, COUNT(*) as count FROM teacher WHERE is_active = 1 GROUP BY departement ORDER BY departement'
-      )
-
-      const departments = deptRows as mysql.RowDataPacket[]
+      const { data: deptRows, error: deptError } = await supabase
+        .from('teacher')
+        .select('departement')
+        .eq('is_active', 1)
+      if (deptError) throw deptError
       const byDepartment: { [key: string]: number } = {}
-      
-      departments.forEach(row => {
-        byDepartment[row.departement] = row.count
-      })
-
+      if (deptRows) {
+        for (const row of deptRows) {
+          const key = row.departement ? String(row.departement) : 'Unknown'
+          byDepartment[key] = (byDepartment[key] || 0) + 1
+        }
+      }
       return { total, byDepartment }
-
     } catch (error) {
       console.error('Error getting teacher stats:', error)
       throw new Error('Database error occurred while fetching teacher statistics')

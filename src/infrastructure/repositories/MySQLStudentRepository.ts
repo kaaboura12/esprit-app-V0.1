@@ -2,47 +2,33 @@ import { StudentRepository } from "@/core/interfaces/StudentRepository"
 import { Etudiant } from "@/core/entities/Etudiant"
 import { Email } from "@/core/value-objects/Email"
 import { StudentNumber } from "@/core/value-objects/StudentNumber"
-import { getConnectionPool } from "@/infrastructure/config/database"
-import mysql from 'mysql2/promise'
+import { supabase } from "@/infrastructure/config/database"
 
 /**
- * MySQL Student Repository Implementation - Infrastructure layer
- * This implements the StudentRepository interface with MySQL database storage
+ * Supabase Student Repository Implementation - Infrastructure layer
+ * This implements the StudentRepository interface with Supabase database storage
  */
 export class MySQLStudentRepository implements StudentRepository {
-  private pool: mysql.Pool
-
-  constructor() {
-    this.pool = getConnectionPool()
-  }
+  // No constructor needed for Supabase
 
   async findById(id: number): Promise<Etudiant | null> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance FROM etudiant WHERE id = ?',
-        [id]
+      const { data, error } = await supabase
+        .from('etudiant')
+        .select('id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance')
+        .eq('id', id)
+        .maybeSingle()
+      if (error) throw error
+      if (!data) return null
+      return new Etudiant(
+        data.id,
+        data.firstname,
+        data.lastname,
+        new Email(data.email),
+        data.classe_id,
+        new StudentNumber(data.numero_etudiant),
+        data.date_naissance
       )
-
-      const students = rows as mysql.RowDataPacket[]
-      
-      if (students.length === 0) {
-        return null
-      }
-
-      const studentData = students[0]
-      
-      const etudiant = new Etudiant(
-        studentData.id,
-        studentData.firstname,
-        studentData.lastname,
-        new Email(studentData.email),
-        studentData.classe_id,
-        new StudentNumber(studentData.numero_etudiant),
-        studentData.date_naissance
-      )
-
-      return etudiant
-
     } catch (error) {
       console.error('Error finding student by ID:', error)
       throw new Error('Database error occurred while finding student')
@@ -51,31 +37,22 @@ export class MySQLStudentRepository implements StudentRepository {
 
   async findByEmail(email: Email): Promise<Etudiant | null> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance FROM etudiant WHERE email = ?',
-        [email.getValue()]
-      )
-
-      const students = rows as mysql.RowDataPacket[]
-      
-      if (students.length === 0) {
-        return null
-      }
-
-      const studentData = students[0]
-      
-      const etudiant = new Etudiant(
-        studentData.id,
-        studentData.firstname,
-        studentData.lastname,
+      const { data, error } = await supabase
+        .from('etudiant')
+        .select('id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance')
+        .eq('email', email.getValue())
+        .maybeSingle()
+      if (error) throw error
+      if (!data) return null
+      return new Etudiant(
+        data.id,
+        data.firstname,
+        data.lastname,
         email,
-        studentData.classe_id,
-        new StudentNumber(studentData.numero_etudiant),
-        studentData.date_naissance
+        data.classe_id,
+        new StudentNumber(data.numero_etudiant),
+        data.date_naissance
       )
-
-      return etudiant
-
     } catch (error) {
       console.error('Error finding student by email:', error)
       throw new Error('Database error occurred while finding student')
@@ -84,31 +61,22 @@ export class MySQLStudentRepository implements StudentRepository {
 
   async findByStudentNumber(studentNumber: StudentNumber): Promise<Etudiant | null> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance FROM etudiant WHERE numero_etudiant = ?',
-        [studentNumber.getValue()]
-      )
-
-      const students = rows as mysql.RowDataPacket[]
-      
-      if (students.length === 0) {
-        return null
-      }
-
-      const studentData = students[0]
-      
-      const etudiant = new Etudiant(
-        studentData.id,
-        studentData.firstname,
-        studentData.lastname,
-        new Email(studentData.email),
-        studentData.classe_id,
+      const { data, error } = await supabase
+        .from('etudiant')
+        .select('id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance')
+        .eq('numero_etudiant', studentNumber.getValue())
+        .maybeSingle()
+      if (error) throw error
+      if (!data) return null
+      return new Etudiant(
+        data.id,
+        data.firstname,
+        data.lastname,
+        new Email(data.email),
+        data.classe_id,
         studentNumber,
-        studentData.date_naissance
+        data.date_naissance
       )
-
-      return etudiant
-
     } catch (error) {
       console.error('Error finding student by student number:', error)
       throw new Error('Database error occurred while finding student')
@@ -117,51 +85,53 @@ export class MySQLStudentRepository implements StudentRepository {
 
   async create(etudiant: Etudiant): Promise<Etudiant> {
     try {
-      const [result] = await this.pool.execute(
-        'INSERT INTO etudiant (firstname, lastname, email, classe_id, numero_etudiant, date_naissance) VALUES (?, ?, ?, ?, ?, ?)',
-        [
-          etudiant.getFirstname(),
-          etudiant.getLastname(),
-          etudiant.getEmailValue(),
-          etudiant.getClasseId(),
-          etudiant.getNumeroEtudiantValue(),
-          etudiant.getDateNaissance()
-        ]
-      )
-
-      const insertResult = result as mysql.ResultSetHeader
-      const newStudentId = insertResult.insertId
-
-      // Return the created student with the new ID
+      const { data, error } = await supabase
+        .from('etudiant')
+        .insert([
+          {
+            firstname: etudiant.getFirstname(),
+            lastname: etudiant.getLastname(),
+            email: etudiant.getEmailValue(),
+            classe_id: etudiant.getClasseId(),
+            numero_etudiant: etudiant.getNumeroEtudiantValue(),
+            date_naissance: etudiant.getDateNaissance(),
+            is_active: 1
+          }
+        ])
+        .select('*')
+        .single()
+      if (error) {
+        if (error.code === '23505' || error.message.includes('duplicate')) {
+          throw new Error('Un étudiant avec cet email ou ce numéro existe déjà')
+        }
+        throw error
+      }
       return new Etudiant(
-        newStudentId,
-        etudiant.getFirstname(),
-        etudiant.getLastname(),
-        new Email(etudiant.getEmailValue()),
-        etudiant.getClasseId(),
-        new StudentNumber(etudiant.getNumeroEtudiantValue()),
-        etudiant.getDateNaissance()
+        data.id,
+        data.firstname,
+        data.lastname,
+        new Email(data.email),
+        data.classe_id,
+        new StudentNumber(data.numero_etudiant),
+        data.date_naissance
       )
-
     } catch (error) {
       console.error('Error creating student:', error)
-      if ((error as any).code === 'ER_DUP_ENTRY') {
-        throw new Error('Un étudiant avec cet email ou ce numéro existe déjà')
-      }
-      throw new Error('Database error occurred while creating student')
+      throw error
     }
   }
 
   async findByClasseId(classeId: number): Promise<Etudiant[]> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance FROM etudiant WHERE classe_id = ?  ORDER BY lastname, firstname',
-        [classeId]
-      )
-
-      const students = rows as mysql.RowDataPacket[]
-      
-      return students.map(studentData => new Etudiant(
+      const { data, error } = await supabase
+        .from('etudiant')
+        .select('id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance')
+        .eq('classe_id', classeId)
+        .order('lastname', { ascending: true })
+        .order('firstname', { ascending: true })
+      if (error) throw error
+      if (!data) return []
+      return data.map(studentData => new Etudiant(
         studentData.id,
         studentData.firstname,
         studentData.lastname,
@@ -170,7 +140,6 @@ export class MySQLStudentRepository implements StudentRepository {
         new StudentNumber(studentData.numero_etudiant),
         studentData.date_naissance
       ))
-
     } catch (error) {
       console.error('Error finding students by class ID:', error)
       throw new Error('Database error occurred while finding students by class')
@@ -179,13 +148,14 @@ export class MySQLStudentRepository implements StudentRepository {
 
   async findAll(): Promise<Etudiant[]> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance FROM etudiant ORDER BY lastname, firstname'
-      )
-
-      const students = rows as mysql.RowDataPacket[]
-      
-      return students.map(studentData => new Etudiant(
+      const { data, error } = await supabase
+        .from('etudiant')
+        .select('id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance')
+        .order('lastname', { ascending: true })
+        .order('firstname', { ascending: true })
+      if (error) throw error
+      if (!data) return []
+      return data.map(studentData => new Etudiant(
         studentData.id,
         studentData.firstname,
         studentData.lastname,
@@ -194,7 +164,6 @@ export class MySQLStudentRepository implements StudentRepository {
         new StudentNumber(studentData.numero_etudiant),
         studentData.date_naissance
       ))
-
     } catch (error) {
       console.error('Error getting all students:', error)
       throw new Error('Database error occurred while fetching students')
@@ -205,53 +174,62 @@ export class MySQLStudentRepository implements StudentRepository {
     try {
       // Check if student exists
       const existingStudent = await this.findById(etudiant.getId())
-      
       if (existingStudent) {
         // Update existing student
-        await this.pool.execute(
-          'UPDATE etudiant SET firstname = ?, lastname = ?, email = ?, classe_id = ?, numero_etudiant = ?, date_naissance = ?, updated_at = NOW() WHERE id = ?',
-          [
-            etudiant.getFirstname(),
-            etudiant.getLastname(),
-            etudiant.getEmailValue(),
-            etudiant.getClasseId(),
-            etudiant.getNumeroEtudiantValue(),
-            etudiant.getDateNaissance(),
-            etudiant.getId()
-          ]
-        )
+        const { error } = await supabase
+          .from('etudiant')
+          .update({
+            firstname: etudiant.getFirstname(),
+            lastname: etudiant.getLastname(),
+            email: etudiant.getEmailValue(),
+            classe_id: etudiant.getClasseId(),
+            numero_etudiant: etudiant.getNumeroEtudiantValue(),
+            date_naissance: etudiant.getDateNaissance(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', etudiant.getId())
+        if (error) {
+          if (error.code === '23505' || error.message.includes('duplicate')) {
+            throw new Error('A student with this email or student number already exists')
+          }
+          throw error
+        }
       } else {
         // Insert new student
-        await this.pool.execute(
-          'INSERT INTO etudiant (id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [
-            etudiant.getId(),
-            etudiant.getFirstname(),
-            etudiant.getLastname(),
-            etudiant.getEmailValue(),
-            etudiant.getClasseId(),
-            etudiant.getNumeroEtudiantValue(),
-            etudiant.getDateNaissance()
-          ]
-        )
+        const { error } = await supabase
+          .from('etudiant')
+          .insert([
+            {
+              id: etudiant.getId(),
+              firstname: etudiant.getFirstname(),
+              lastname: etudiant.getLastname(),
+              email: etudiant.getEmailValue(),
+              classe_id: etudiant.getClasseId(),
+              numero_etudiant: etudiant.getNumeroEtudiantValue(),
+              date_naissance: etudiant.getDateNaissance(),
+              is_active: 1
+            }
+          ])
+        if (error) {
+          if (error.code === '23505' || error.message.includes('duplicate')) {
+            throw new Error('A student with this email or student number already exists')
+          }
+          throw error
+        }
       }
-
     } catch (error) {
       console.error('Error saving student:', error)
-      if ((error as any).code === 'ER_DUP_ENTRY') {
-        throw new Error('A student with this email or student number already exists')
-      }
       throw new Error('Database error occurred while saving student')
     }
   }
 
   async delete(id: number): Promise<void> {
     try {
-      await this.pool.execute(
-        'UPDATE etudiant SET is_active = 0, updated_at = NOW() WHERE id = ?',
-        [id]
-      )
-
+      const { error } = await supabase
+        .from('etudiant')
+        .update({ is_active: 0, updated_at: new Date().toISOString() })
+        .eq('id', id)
+      if (error) throw error
     } catch (error) {
       console.error('Error deleting student:', error)
       throw new Error('Database error occurred while deleting student')
@@ -261,25 +239,27 @@ export class MySQLStudentRepository implements StudentRepository {
   async getStudentStats(): Promise<{ total: number, byClasse: { [key: string]: number } }> {
     try {
       // Get total count
-      const [totalRows] = await this.pool.execute(
-        'SELECT COUNT(*) as total FROM etudiant WHERE is_active = 1'
-      )
-      const total = (totalRows as mysql.RowDataPacket[])[0].total
+      const { data: totalRows, error: totalError } = await supabase
+        .from('etudiant')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_active', 1)
+      if (totalError) throw totalError
+      const total = totalRows?.length || 0
 
       // Get count by class
-      const [classRows] = await this.pool.execute(
-        'SELECT c.nom as classe_name, COUNT(e.id) as count FROM etudiant e LEFT JOIN classe c ON e.classe_id = c.id GROUP BY e.classe_id, c.nom ORDER BY c.nom'
-      )
-
-      const classes = classRows as mysql.RowDataPacket[]
+      const { data: classRows, error: classError } = await supabase
+        .from('etudiant')
+        .select('classe_id')
+        .eq('is_active', 1)
+      if (classError) throw classError
       const byClasse: { [key: string]: number } = {}
-      
-      classes.forEach(row => {
-        byClasse[row.classe_name || 'Unknown'] = row.count
-      })
-
+      if (classRows) {
+        for (const row of classRows) {
+          const key = row.classe_id ? String(row.classe_id) : 'Unknown'
+          byClasse[key] = (byClasse[key] || 0) + 1
+        }
+      }
       return { total, byClasse }
-
     } catch (error) {
       console.error('Error getting student stats:', error)
       throw new Error('Database error occurred while fetching student statistics')

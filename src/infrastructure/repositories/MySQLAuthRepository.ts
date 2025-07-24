@@ -2,47 +2,40 @@ import bcrypt from 'bcryptjs'
 import { AuthRepository } from "@/core/interfaces/AuthRepository"
 import { Teacher } from "@/core/entities/Teacher"
 import { Email } from "@/core/value-objects/Email"
-import { getConnectionPool } from "@/infrastructure/config/database"
-import mysql from 'mysql2/promise'
+import { supabase } from "@/infrastructure/config/database"
 
 /**
- * MySQL Authentication Repository Implementation - Infrastructure layer
- * This implements the AuthRepository interface with MySQL database storage
+ * Supabase Authentication Repository Implementation - Infrastructure layer
+ * This implements the AuthRepository interface with Supabase database storage
  */
 export class MySQLAuthRepository implements AuthRepository {
-  private pool: mysql.Pool
-
-  constructor() {
-    this.pool = getConnectionPool()
-  }
+  // No constructor needed for Supabase
 
   async findTeacherByEmail(email: Email): Promise<Teacher | null> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, departement, motdepasse FROM teacher WHERE email = ? AND is_active = 1',
-        [email.getValue()]
-      )
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('id, firstname, lastname, email, departement, motdepasse')
+        .eq('email', email.getValue())
+        .eq('is_active', 1)
+        .maybeSingle()
 
-      const teachers = rows as mysql.RowDataPacket[]
-      
-      if (teachers.length === 0) {
+      if (error) {
+        console.error('Error finding teacher by email:', error)
+        throw new Error('Database error occurred while finding teacher')
+      }
+      if (!data) {
         return null
       }
-
-      const teacherData = teachers[0]
-      
-      // Create Teacher entity using the existing email value object
       const teacher = new Teacher(
-        teacherData.id,
-        teacherData.firstname,
-        teacherData.lastname,
+        data.id,
+        data.firstname,
+        data.lastname,
         email, // Use the email value object passed in
-        teacherData.departement,
-        teacherData.motdepasse
+        data.departement,
+        data.motdepasse
       )
-
       return teacher
-
     } catch (error) {
       console.error('Error finding teacher by email:', error)
       throw new Error('Database error occurred while finding teacher')
@@ -72,10 +65,13 @@ export class MySQLAuthRepository implements AuthRepository {
 
   async updateLastLogin(teacherId: number): Promise<void> {
     try {
-      await this.pool.execute(
-        'UPDATE teacher SET last_login = NOW() WHERE id = ?',
-        [teacherId]
-      )
+      const { error } = await supabase
+        .from('teacher')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', teacherId)
+      if (error) {
+        console.error('Error updating last login:', error)
+      }
     } catch (error) {
       console.error('Error updating last login:', error)
       // Don't throw error for this operation as it's not critical
@@ -84,30 +80,28 @@ export class MySQLAuthRepository implements AuthRepository {
 
   async findTeacherById(id: number): Promise<Teacher | null> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, departement, motdepasse FROM teacher WHERE id = ? AND is_active = 1',
-        [id]
-      )
-
-      const teachers = rows as mysql.RowDataPacket[]
-      
-      if (teachers.length === 0) {
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('id, firstname, lastname, email, departement, motdepasse')
+        .eq('id', id)
+        .eq('is_active', 1)
+        .maybeSingle()
+      if (error) {
+        console.error('Error finding teacher by ID:', error)
+        throw new Error('Database error occurred while finding teacher')
+      }
+      if (!data) {
         return null
       }
-
-      const teacherData = teachers[0]
-      
       const teacher = new Teacher(
-        teacherData.id,
-        teacherData.firstname,
-        teacherData.lastname,
-        new Email(teacherData.email),
-        teacherData.departement,
-        teacherData.motdepasse
+        data.id,
+        data.firstname,
+        data.lastname,
+        new Email(data.email),
+        data.departement,
+        data.motdepasse
       )
-
       return teacher
-
     } catch (error) {
       console.error('Error finding teacher by ID:', error)
       throw new Error('Database error occurred while finding teacher')
@@ -116,13 +110,18 @@ export class MySQLAuthRepository implements AuthRepository {
 
   async getAllTeachers(): Promise<Teacher[]> {
     try {
-      const [rows] = await this.pool.execute(
-        'SELECT id, firstname, lastname, email, departement, motdepasse FROM teacher WHERE is_active = 1 ORDER BY lastname, firstname'
-      )
-
-      const teachers = rows as mysql.RowDataPacket[]
-      
-      return teachers.map(teacherData => new Teacher(
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('id, firstname, lastname, email, departement, motdepasse')
+        .eq('is_active', 1)
+        .order('lastname', { ascending: true })
+        .order('firstname', { ascending: true })
+      if (error) {
+        console.error('Error getting all teachers:', error)
+        throw new Error('Database error occurred while fetching teachers')
+      }
+      if (!data) return []
+      return data.map(teacherData => new Teacher(
         teacherData.id,
         teacherData.firstname,
         teacherData.lastname,
@@ -130,7 +129,6 @@ export class MySQLAuthRepository implements AuthRepository {
         teacherData.departement,
         teacherData.motdepasse
       ))
-
     } catch (error) {
       console.error('Error getting all teachers:', error)
       throw new Error('Database error occurred while fetching teachers')
@@ -147,15 +145,27 @@ export class MySQLAuthRepository implements AuthRepository {
     try {
       const emailVO = new Email(email)
       const hashedPassword = await this.hashPassword(plainPassword)
-
-      const [result] = await this.pool.execute(
-        'INSERT INTO teacher (firstname, lastname, email, departement, motdepasse) VALUES (?, ?, ?, ?, ?)',
-        [firstname, lastname, emailVO.getValue(), departement, hashedPassword]
-      )
-
-      const insertResult = result as mysql.ResultSetHeader
-      const teacherId = insertResult.insertId
-
+      const { data, error } = await supabase
+        .from('teacher')
+        .insert([
+          {
+            firstname,
+            lastname,
+            email: emailVO.getValue(),
+            departement,
+            motdepasse: hashedPassword,
+            is_active: 1
+          }
+        ])
+        .select('id')
+        .single()
+      if (error) {
+        if (error.code === '23505' || error.message.includes('duplicate')) {
+          throw new Error('A teacher with this email already exists')
+        }
+        throw new Error('Database error occurred while creating teacher')
+      }
+      const teacherId = data.id
       const teacher = new Teacher(
         teacherId,
         firstname,
@@ -164,15 +174,10 @@ export class MySQLAuthRepository implements AuthRepository {
         departement,
         hashedPassword
       )
-
       return teacher
-
     } catch (error) {
       console.error('Error creating teacher:', error)
-      if ((error as any).code === 'ER_DUP_ENTRY') {
-        throw new Error('A teacher with this email already exists')
-      }
-      throw new Error('Database error occurred while creating teacher')
+      throw error
     }
   }
 } 
