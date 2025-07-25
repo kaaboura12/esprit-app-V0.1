@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server'
-import { getConnectionPool } from '@/infrastructure/config/database'
+import { supabase } from '@/infrastructure/config/supabaseClient'
 
 export async function GET() {
   try {
-    const pool = getConnectionPool()
-    const [rows] = await pool.execute(
-      'SELECT id, nom_classe, bloc, numclasse FROM classe ORDER BY nom_classe'
-    )
-    
-    return NextResponse.json(rows)
+    const { data, error } = await supabase
+      .from('classe')
+      .select('id, nom_classe, bloc, numclasse')
+      .order('nom_classe')
+
+    if (error) {
+      throw error
+    }
+
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error fetching classes:', error)
     return NextResponse.json(

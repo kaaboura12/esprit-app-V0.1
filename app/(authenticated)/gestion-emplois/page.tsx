@@ -173,15 +173,15 @@ export default function GestionEmploisPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="bg-white/95 backdrop-blur-xl border-b border-[#e5e7eb] sticky top-0 z-40">
-            <div className="px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
+            <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6 w-full md:w-auto">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                    <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold text-black">Gestion des Emplois du Temps</h1>
-                    <p className="text-[#6b7280] mt-1">Organisez et gérez les emplois du temps de votre établissement</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-black">Gestion des Emplois du Temps</h1>
+                    <p className="text-[#6b7280] mt-1 text-sm sm:text-base">Organisez et gérez les emplois du temps de votre établissement</p>
                   </div>
                 </div>
                 <button 
@@ -189,20 +189,20 @@ export default function GestionEmploisPage() {
                     setSelectedDate(new Date())
                     setIsAddEventModalOpen(true)
                   }}
-                  className="inline-flex items-center gap-2 px-6 py-2 bg-[#ef4444] text-white rounded-xl font-semibold hover:bg-[#dc2626] transition-colors shadow-md mt-2 md:mt-0"
+                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 bg-[#ef4444] text-white rounded-xl font-semibold hover:bg-[#dc2626] transition-colors shadow-md mt-2 md:mt-0 w-full md:w-auto justify-center"
                 >
                   <Plus className="w-4 h-4" />
                   Nouvel Événement
                 </button>
               </div>
-              <div className="flex items-center space-x-4">
-                <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#e5e7eb] rounded-xl hover:shadow-md transition-all duration-300">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto mt-2 md:mt-0">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#e5e7eb] rounded-xl hover:shadow-md transition-all duration-300 w-full sm:w-auto justify-center">
                   <Download className="w-4 h-4 text-[#6b7280]" />
                   <span className="font-medium text-[#374151]">Exporter</span>
                 </button>
                 <button 
                   onClick={() => setIsPdfImportModalOpen(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#e5e7eb] rounded-xl hover:shadow-md transition-all duration-300"
+                  className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#e5e7eb] rounded-xl hover:shadow-md transition-all duration-300 w-full sm:w-auto justify-center"
                 >
                   <FileText className="w-4 h-4 text-[#6b7280]" />
                   <span className="font-medium text-[#374151]">Importer PDF</span>
@@ -212,77 +212,76 @@ export default function GestionEmploisPage() {
           </div>
 
           {/* Statistic Cards */}
-          <div className="px-8 pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
+          <div className="px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <span className="text-[#ef4444] font-bold text-2xl">
+                <span className="text-[#ef4444] font-bold text-xl sm:text-2xl">
                   {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.courseCount || 0)}
                 </span>
               </div>
-              <span className="text-[#374151] text-sm">Cours cette semaine</span>
+              <span className="text-[#374151] text-xs sm:text-sm">Cours cette semaine</span>
             </div>
-            <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                  <Users className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <span className="text-[#ef4444] font-bold text-2xl">
+                <span className="text-[#ef4444] font-bold text-xl sm:text-2xl">
                   {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.tdCount || 0)}
                 </span>
               </div>
-              <span className="text-[#374151] text-sm">TD cette semaine</span>
+              <span className="text-[#374151] text-xs sm:text-sm">TD cette semaine</span>
             </div>
-            <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <span className="text-[#ef4444] font-bold text-2xl">
+                <span className="text-[#ef4444] font-bold text-xl sm:text-2xl">
                   {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.tpCount || 0)}
                 </span>
               </div>
-              <span className="text-[#374151] text-sm">TP cette semaine</span>
+              <span className="text-[#374151] text-xs sm:text-sm">TP cette semaine</span>
             </div>
-            <div className="bg-white rounded-2xl p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#e5e7eb] shadow flex flex-col items-start">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <span className="text-[#ef4444] font-bold text-2xl">
+                <span className="text-[#ef4444] font-bold text-xl sm:text-2xl">
                   {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (stats?.activeSchedules || 0)}
                 </span>
               </div>
-              <span className="text-[#374151] text-sm">Emplois actifs</span>
+              <span className="text-[#374151] text-xs sm:text-sm">Emplois actifs</span>
             </div>
           </div>
 
           {/* Calendar Section */}
-          <div className="px-8 py-10">
+          <div className="px-4 sm:px-6 md:px-8 py-8 sm:py-10">
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl overflow-hidden">
               {/* Calendar Header with View Controls */}
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-4 sm:px-6 py-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-white" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                      <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">Calendrier</h2>
-                      <p className="text-sm text-gray-600">Gérez vos emplois du temps</p>
+                      <h2 className="text-lg sm:text-xl font-bold text-gray-900">Calendrier</h2>
+                      <p className="text-xs sm:text-sm text-gray-600">Gérez vos emplois du temps</p>
                     </div>
                   </div>
-                  
                   {/* View Controls */}
-                  <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-200 shadow-sm p-1">
+                  <div className="flex flex-wrap items-center gap-2 bg-white rounded-xl border border-gray-200 shadow-sm p-1">
                     <button
                       onClick={() => {
                         setCurrentView('dayGridMonth')
                         calendarRef.current?.getApi().changeView('dayGridMonth')
                       }}
-                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${
                         currentView === 'dayGridMonth'
                           ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -295,7 +294,7 @@ export default function GestionEmploisPage() {
                         setCurrentView('timeGridWeek')
                         calendarRef.current?.getApi().changeView('timeGridWeek')
                       }}
-                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${
                         currentView === 'timeGridWeek'
                           ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -308,7 +307,7 @@ export default function GestionEmploisPage() {
                         setCurrentView('timeGridDay')
                         calendarRef.current?.getApi().changeView('timeGridDay')
                       }}
-                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${
                         currentView === 'timeGridDay'
                           ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -321,7 +320,7 @@ export default function GestionEmploisPage() {
                         setCurrentView('listWeek')
                         calendarRef.current?.getApi().changeView('listWeek')
                       }}
-                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${
                         currentView === 'listWeek'
                           ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -331,9 +330,8 @@ export default function GestionEmploisPage() {
                     </button>
                   </div>
                 </div>
-                
                 {/* Navigation Controls */}
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-2 sm:gap-0">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => calendarRef.current?.getApi().prev()}
@@ -345,7 +343,7 @@ export default function GestionEmploisPage() {
                     </button>
                     <button
                       onClick={() => calendarRef.current?.getApi().today()}
-                      className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-medium text-sm hover:shadow-md transition-all duration-200"
+                      className="px-3 sm:px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-medium text-xs sm:text-sm hover:shadow-md transition-all duration-200"
                     >
                       Aujourd'hui
                     </button>
@@ -358,14 +356,12 @@ export default function GestionEmploisPage() {
                       </svg>
                     </button>
                   </div>
-                  
-                  <div className="text-lg font-semibold text-gray-900" id="calendar-title">
+                  <div className="text-base sm:text-lg font-semibold text-gray-900 mt-2 sm:mt-0" id="calendar-title">
                     {/* This will be updated by FullCalendar */}
                   </div>
                 </div>
               </div>
-              
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {loading && (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 animate-spin text-red-500" />

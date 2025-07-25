@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server'
-import { getConnectionPool } from '@/infrastructure/config/database'
+import { supabase } from '@/infrastructure/config/supabaseClient'
 
 export async function GET() {
   try {
-    const pool = getConnectionPool()
-    const [rows] = await pool.execute(
-      'SELECT id, firstname, lastname, departement FROM teacher ORDER BY firstname, lastname'
-    )
-    
-    return NextResponse.json(rows)
+    const { data, error } = await supabase
+      .from('teacher')
+      .select('id, firstname, lastname, departement')
+      .order('firstname')
+      .order('lastname')
+
+    if (error) {
+      throw error
+    }
+
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error fetching teachers:', error)
     return NextResponse.json(
