@@ -192,10 +192,19 @@ export function useAuth() {
     }
   }
 
+  const updateTeacher = (updated: AuthTeacher) => {
+    setAuthState(prev => ({
+      ...prev,
+      teacher: updated
+    }))
+    localStorage.setItem('teacher', JSON.stringify(updated))
+  }
+
   return {
     ...authState,
     logout,
     refreshAuth,
-    updateTeacherPhoto
+    updateTeacherPhoto,
+    updateTeacher
   }
 } 

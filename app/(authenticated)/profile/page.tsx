@@ -20,7 +20,15 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { teacher, loading, updateTeacherPhoto } = useAuth()
+  const { teacher, loading, updateTeacherPhoto, updateTeacher } = useAuth()
+
+  const [editValues, setEditValues] = useState({
+    firstname: teacher?.firstname || '',
+    lastname: teacher?.lastname || '',
+    email: teacher?.email || '',
+    departement: teacher?.departement || ''
+  })
+  const [editSuccess, setEditSuccess] = useState<string | null>(null)
 
   // Show loading state while fetching teacher data
   if (loading) {
@@ -123,6 +131,45 @@ export default function ProfilePage() {
     event.target.value = ''
   }
 
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValues({ ...editValues, [e.target.name]: e.target.value })
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsUploading(true)
+    setUploadError(null)
+    setEditSuccess(null)
+    try {
+      const response = await fetch('/api/teachers/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: teacher.id,
+          ...editValues
+        })
+      })
+      const data = await response.json()
+      if (data.success && data.teacher) {
+        updateTeacher(data.teacher); // update context in real time
+        updateTeacherPhoto(data.teacher.photoUrl); // keep this for photo
+        // Update localStorage with new token and teacher data
+        if (data.token && data.teacher) {
+          localStorage.setItem('auth_token', data.token)
+          localStorage.setItem('teacher', JSON.stringify(data.teacher))
+        }
+        setEditSuccess('Profil mis à jour avec succès !')
+        setIsEditing(false)
+      } else {
+        setUploadError(data.message || 'Erreur lors de la mise à jour du profil.')
+      }
+    } catch (error) {
+      setUploadError('Erreur de connexion. Veuillez réessayer.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center p-8 relative overflow-hidden">
@@ -146,7 +193,15 @@ export default function ProfilePage() {
               
               <div className="absolute top-6 right-6">
                 <button 
-                  onClick={() => setIsEditing(!isEditing)}
+                  onClick={() => {
+                    setEditValues({
+                      firstname: teacher.firstname,
+                      lastname: teacher.lastname,
+                      email: teacher.email,
+                      departement: teacher.departement
+                    });
+                    setIsEditing(true);
+                  }}
                   className="flex items-center space-x-2 bg-white/15 hover:bg-white/25 backdrop-blur-md rounded-xl px-4 py-2 text-white transition-all duration-300 border border-white/20"
                 >
                   <Edit3 className="w-4 h-4" />
@@ -229,50 +284,127 @@ export default function ProfilePage() {
                   </button>
                 </div>
               )}
-
-              {/* Bio Section */}
-              <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <BookOpen className="w-5 h-5 mr-2 text-red-500" />
-                  À propos
-                </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  Professeur passionné par l'enseignement et dédié à l'excellence académique. 
-                  Spécialisé dans le département {teacher.departement} avec une expertise dans 
-                  l'encadrement et la formation des étudiants.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium">
-                    {teacher.departement}
-                  </span>
+              {editSuccess && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <p className="text-green-700 text-sm">{editSuccess}</p>
+                  <button 
+                    onClick={() => setEditSuccess(null)}
+                    className="mt-2 text-green-600 hover:text-green-800 text-xs underline"
+                  >
+                    Fermer
+                  </button>
                 </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                  <User className="w-5 h-5 mr-2 text-red-500" />
-                  Informations de Contact
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="group">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <div className="flex items-center space-x-3 p-4 rounded-xl bg-gray-50 border border-gray-200 group-hover:border-red-200 transition-colors">
-                      <Mail className="w-5 h-5 text-red-500" />
-                      <span className="text-gray-900 font-medium">{teacher.email}</span>
+              )}
+              {isEditing ? (
+                <form onSubmit={handleEditSubmit} className="space-y-6 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                      <input
+                        type="text"
+                        name="firstname"
+                        value={editValues.firstname}
+                        onChange={handleEditChange}
+                        className="w-full p-3 rounded-xl border border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                      <input
+                        type="text"
+                        name="lastname"
+                        value={editValues.lastname}
+                        onChange={handleEditChange}
+                        className="w-full p-3 rounded-xl border border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={editValues.email}
+                        onChange={handleEditChange}
+                        className="w-full p-3 rounded-xl border border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Département</label>
+                      <input
+                        type="text"
+                        name="departement"
+                        value={editValues.departement}
+                        onChange={handleEditChange}
+                        className="w-full p-3 rounded-xl border border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                        required
+                      />
                     </div>
                   </div>
-                  
-                  <div className="group">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Département</label>
-                    <div className="flex items-center space-x-3 p-4 rounded-xl bg-gray-50 border border-gray-200 group-hover:border-red-200 transition-colors">
-                      <GraduationCap className="w-5 h-5 text-red-500" />
-                      <span className="text-gray-900 font-medium">{teacher.departement}</span>
+                  <div className="flex space-x-4">
+                    <button
+                      type="submit"
+                      className="bg-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50"
+                      disabled={isUploading}
+                    >
+                      {isUploading ? <Loader2 className="w-5 h-5 animate-spin inline-block" /> : 'Enregistrer'}
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-gray-200 text-gray-700 px-6 py-2 rounded-xl font-semibold hover:bg-gray-300"
+                      onClick={() => setIsEditing(false)}
+                      disabled={isUploading}
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  {/* Bio Section */}
+                  <div className="mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                      <BookOpen className="w-5 h-5 mr-2 text-red-500" />
+                      À propos
+                    </h2>
+                    <p className="text-gray-700 leading-relaxed mb-4">
+                      Professeur passionné par l'enseignement et dédié à l'excellence académique. 
+                      Spécialisé dans le département {teacher.departement} avec une expertise dans 
+                      l'encadrement et la formation des étudiants.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                        {teacher.departement}
+                      </span>
                     </div>
                   </div>
-                </div>
-              </div>
+                  {/* Contact Information */}
+                  <div className="space-y-6">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                      <User className="w-5 h-5 mr-2 text-red-500" />
+                      Informations de Contact
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="group">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <div className="flex items-center space-x-3 p-4 rounded-xl bg-gray-50 border border-gray-200 group-hover:border-red-200 transition-colors">
+                          <Mail className="w-5 h-5 text-red-500" />
+                          <span className="text-gray-900 font-medium">{teacher.email}</span>
+                        </div>
+                      </div>
+                      <div className="group">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Département</label>
+                        <div className="flex items-center space-x-3 p-4 rounded-xl bg-gray-50 border border-gray-200 group-hover:border-red-200 transition-colors">
+                          <GraduationCap className="w-5 h-5 text-red-500" />
+                          <span className="text-gray-900 font-medium">{teacher.departement}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
