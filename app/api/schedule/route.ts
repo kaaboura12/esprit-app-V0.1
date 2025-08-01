@@ -28,8 +28,12 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: 'weekStart parameter is required' }, { status: 400 })
         }
         if (teacherId) {
+          const parsedWeekTeacherId = parseInt(teacherId)
+          if (isNaN(parsedWeekTeacherId)) {
+            return NextResponse.json({ error: 'Invalid teacherId parameter' }, { status: 400 })
+          }
           schedules = await getSchedulesUseCase.getSchedulesByTeacher(
-            parseInt(teacherId),
+            parsedWeekTeacherId,
             new Date(weekStart),
             new Date(new Date(weekStart).getTime() + 7 * 24 * 60 * 60 * 1000)
           )
@@ -49,8 +53,12 @@ export async function GET(request: NextRequest) {
         if (!teacherId) {
           return NextResponse.json({ error: 'teacherId parameter is required' }, { status: 400 })
         }
+        const parsedTeacherTeacherId = parseInt(teacherId)
+        if (isNaN(parsedTeacherTeacherId)) {
+          return NextResponse.json({ error: 'Invalid teacherId parameter' }, { status: 400 })
+        }
         schedules = await getSchedulesUseCase.getSchedulesByTeacher(
-          parseInt(teacherId),
+          parsedTeacherTeacherId,
           startDate ? new Date(startDate) : undefined,
           endDate ? new Date(endDate) : undefined
         )
@@ -60,8 +68,12 @@ export async function GET(request: NextRequest) {
         if (!classeId) {
           return NextResponse.json({ error: 'classeId parameter is required' }, { status: 400 })
         }
+        const parsedClasseId = parseInt(classeId)
+        if (isNaN(parsedClasseId)) {
+          return NextResponse.json({ error: 'Invalid classeId parameter' }, { status: 400 })
+        }
         schedules = await getSchedulesUseCase.getSchedulesByClass(
-          parseInt(classeId),
+          parsedClasseId,
           startDate ? new Date(startDate) : undefined,
           endDate ? new Date(endDate) : undefined
         )
@@ -71,18 +83,29 @@ export async function GET(request: NextRequest) {
         if (!matiereId) {
           return NextResponse.json({ error: 'matiereId parameter is required' }, { status: 400 })
         }
+        const parsedMatiereId = parseInt(matiereId)
+        if (isNaN(parsedMatiereId)) {
+          return NextResponse.json({ error: 'Invalid matiereId parameter' }, { status: 400 })
+        }
         schedules = await getSchedulesUseCase.getSchedulesBySubject(
-          parseInt(matiereId),
+          parsedMatiereId,
           startDate ? new Date(startDate) : undefined,
           endDate ? new Date(endDate) : undefined
         )
         break
 
       case 'stats':
+        let parsedStatsTeacherId: number | undefined = undefined
+        if (teacherId) {
+          parsedStatsTeacherId = parseInt(teacherId)
+          if (isNaN(parsedStatsTeacherId)) {
+            return NextResponse.json({ error: 'Invalid teacherId parameter' }, { status: 400 })
+          }
+        }
         const stats = await getSchedulesUseCase.getScheduleStats(
           startDate ? new Date(startDate) : undefined,
           endDate ? new Date(endDate) : undefined,
-          teacherId ? parseInt(teacherId) : undefined
+          parsedStatsTeacherId
         )
         return NextResponse.json(stats)
 

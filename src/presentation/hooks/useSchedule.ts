@@ -142,7 +142,7 @@ export const useSchedule = () => {
    */
   const loadStats = async () => {
     try {
-      const statsData = await apiService.getScheduleStats(undefined, undefined, teacher?.id)
+      const statsData = await apiService.getScheduleStats(undefined, undefined, teacher?.id || undefined)
       setStats(statsData)
     } catch (err) {
       console.error('Failed to load stats:', err)
@@ -156,7 +156,11 @@ export const useSchedule = () => {
     setLoading(true)
     setError(null)
     try {
-      const scheduleData = await apiService.getSchedulesByTeacher(teacher?.id!)
+      if (!teacher?.id) {
+        setError('Teacher ID is required to load schedules')
+        return
+      }
+      const scheduleData = await apiService.getSchedulesByTeacher(teacher.id)
       setSchedules(scheduleData)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load schedules')
