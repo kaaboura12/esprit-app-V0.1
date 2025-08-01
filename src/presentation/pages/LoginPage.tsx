@@ -23,7 +23,7 @@ export function LoginPage() {
       const loginRequest: LoginRequestDTO = {
         email,
         password,
-        rememberMe
+        rememberMe: rememberMe
       }
 
       const response = await fetch('/api/auth/login', {
@@ -187,7 +187,7 @@ export function LoginPage() {
                   </div>
                 </div>
 
-                {/* Enhanced Remember Me & Forgot Password */}
+                {/* Enhanced Remember Me */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center group">
                     <input
@@ -203,9 +203,12 @@ export function LoginPage() {
                       Se souvenir de moi
                     </label>
                   </div>
-                  <a href="#" className="text-sm text-red-500 hover:text-red-600 transition-colors font-semibold hover:underline">
-                    Mot de passe oublié ?
-                  </a>
+                  {rememberMe && (
+                    <div className="flex items-center space-x-1 text-xs text-green-600">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="font-medium">30 jours</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Enhanced Sign In Button */}

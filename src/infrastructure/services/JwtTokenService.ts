@@ -17,9 +17,22 @@ export class JwtTokenService implements TokenService {
     this.secret = new TextEncoder().encode(key)
   }
 
-  async generateToken(teacher: Teacher): Promise<AuthToken> {
+  async generateToken(teacher: Teacher, rememberMe: boolean = false): Promise<AuthToken> {
     const now = new Date()
-    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000) // 24 hours
+    
+    // Set expiration based on remember me option
+    let expiresAt: Date
+    let expirationTime: string
+    
+    if (rememberMe) {
+      // 30 days for "Remember me"
+      expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+      expirationTime = '30d'
+    } else {
+      // 24 hours for regular login
+      expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+      expirationTime = '24h'
+    }
 
     const payload = {
       teacherId: teacher.getId(),
@@ -35,7 +48,7 @@ export class JwtTokenService implements TokenService {
     const token = await new SignJWT(payload)
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      .setExpirationTime(this.expirationTime)
+      .setExpirationTime(expirationTime)
       .sign(this.secret)
 
     return new AuthToken(

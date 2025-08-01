@@ -108,14 +108,23 @@ export function getTokenFromCookies(request: NextRequest): string | null {
 /**
  * Set authentication cookie
  */
-export function setAuthCookie(response: NextResponse, token: string, expiresAt: Date): void {
-  response.cookies.set('auth_token', token, {
+export function setAuthCookie(response: NextResponse, token: string, expiresAt: Date, rememberMe: boolean = false): void {
+  const cookieOptions: any = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    expires: expiresAt,
     path: '/'
-  })
+  }
+
+  if (rememberMe) {
+    // For "Remember me", set a longer expiration
+    cookieOptions.maxAge = 30 * 24 * 60 * 60 // 30 days in seconds
+  } else {
+    // For regular login, use the token's expiration
+    cookieOptions.expires = expiresAt
+  }
+
+  response.cookies.set('auth_token', token, cookieOptions)
 }
 
 /**

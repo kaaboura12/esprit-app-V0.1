@@ -28,8 +28,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const tokenService = JwtTokenServiceSingleton.getInstance()
     const loginUseCase = new LoginUseCase(authRepository, tokenService)
 
-    // Execute login use case
-    const result = await loginUseCase.execute(body.email, body.password)
+    // Execute login use case with remember me option
+    const result = await loginUseCase.execute(body.email, body.password, body.rememberMe || false)
 
     if (!result.success || !result.token) {
       const response: AuthResponseDTO = {
@@ -74,8 +74,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Create response and set auth cookie
     const nextResponse = NextResponse.json(response, { status: 200 })
     
-    // Set authentication cookie for browser requests
-    setAuthCookie(nextResponse, authToken.getToken(), authToken.getExpiresAt())
+    // Set authentication cookie for browser requests with remember me option
+    setAuthCookie(nextResponse, authToken.getToken(), authToken.getExpiresAt(), body.rememberMe || false)
 
     return nextResponse
 

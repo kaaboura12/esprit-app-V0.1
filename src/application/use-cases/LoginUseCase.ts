@@ -14,7 +14,7 @@ export class LoginUseCase {
     private readonly tokenService: TokenService
   ) {}
 
-  async execute(email: string, password: string): Promise<{
+  async execute(email: string, password: string, rememberMe: boolean = false): Promise<{
     success: boolean
     token?: AuthToken
     error?: string
@@ -46,8 +46,8 @@ export class LoginUseCase {
         }
       }
 
-      // Generate JWT token
-      const authToken = await this.tokenService.generateToken(teacher)
+      // Generate JWT token with remember me option
+      const authToken = await this.tokenService.generateToken(teacher, rememberMe)
 
       return {
         success: true,
