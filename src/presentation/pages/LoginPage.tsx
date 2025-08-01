@@ -95,6 +95,8 @@ export function LoginPage() {
                 width={120}
                 height={38}
                 className="h-8 w-auto"
+                priority
+                unoptimized
               />
             </Link>
           </div>
