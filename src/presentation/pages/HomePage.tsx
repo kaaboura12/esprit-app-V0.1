@@ -39,17 +39,17 @@ export function HomePage() {
                 className="h-10 w-auto"
               />
             </div>
-            <nav className="hidden md:flex space-x-8 items-center">
-              <a href="#features" className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium">
+            <nav className="flex space-x-4 md:space-x-8 items-center">
+              <a href="#features" className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium text-sm md:text-base">
                 Fonctionnalités
               </a>
-              <a href="#about" className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium">
+              <a href="#about" className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium text-sm md:text-base">
                 À propos
               </a>
-              <a href="#contact" className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium">
+              <a href="#contact" className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium text-sm md:text-base">
                 Contact
               </a>
-              <Link href="/login" className="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors duration-200">
+              <Link href="/login" className="bg-black text-white px-4 md:px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors duration-200 text-sm md:text-base">
                 Connexion
               </Link>
             </nav>
