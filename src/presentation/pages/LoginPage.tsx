@@ -86,19 +86,16 @@ export function LoginPage() {
       {/* Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-6 py-12">
         <div className="max-w-md w-full space-y-8">
-          {/* Enhanced Logo */}
+          {/* Logo */}
           <div className="text-center">
-            <Link href="/" className="inline-block group">
-              <div className="relative">
-                <Image
-                  src="/logo.png"
-                  alt="Esprit Logo"
-                  width={160}
-                  height={50}
-                  className="h-12 w-auto mx-auto mb-8 transition-all duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-slate-500/10 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
+            <Link href="/" className="flex items-center space-x-3 justify-center mb-8">
+              <Image
+                src="/logo.png"
+                alt="Esprit Logo"
+                width={120}
+                height={38}
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 
