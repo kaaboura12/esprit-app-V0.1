@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Static asset configuration
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
   /* config options here */
 };
 

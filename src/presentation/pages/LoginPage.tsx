@@ -6,6 +6,9 @@ import { Eye, EyeOff, Mail, Lock, ArrowRight, ShieldCheck, Sparkles } from "luci
 import { useState } from "react"
 import { LoginRequestDTO, AuthResponseDTO } from "@/application/dtos/AuthDTO"
 
+// Import logo as a static asset
+import logoImage from "/public/logo.png"
+
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
@@ -89,14 +92,17 @@ export function LoginPage() {
           {/* Logo */}
           <div className="text-center">
             <Link href="/" className="flex items-center space-x-3 justify-center mb-8">
-              <Image
-                src="/logo.png"
+              <img
+                src={logoImage.src}
                 alt="Esprit Logo"
-                width={120}
-                height={38}
                 className="h-8 w-auto"
-                priority
-                unoptimized
+                style={{ width: '120px', height: 'auto' }}
+                onError={(e) => {
+                  console.error('Logo failed to load:', e);
+                  // Fallback to direct path
+                  const img = e.target as HTMLImageElement;
+                  img.src = '/logo.png';
+                }}
               />
             </Link>
           </div>
