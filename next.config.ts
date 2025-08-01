@@ -8,18 +8,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Image optimization configuration
-  images: {
-    unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-  },
-  // Static asset configuration
-  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
   /* config options here */
 };
 
