@@ -59,6 +59,7 @@ export default function NotesDetailPage() {
   
   const [searchTerm, setSearchTerm] = useState('')
   const [showExcelModal, setShowExcelModal] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   // Get current subject and class info
   const currentSubject = subjects.find(s => s.id === matiereId)
@@ -95,6 +96,45 @@ export default function NotesDetailPage() {
     const updateData: any = {}
     updateData[noteType] = value
     return await updateNote(studentId, updateData)
+  }
+
+  const handleExport = async () => {
+    if (!subject || !currentClass) return
+    
+    setExporting(true)
+    try {
+      const params = new URLSearchParams({
+        matiereId: matiereId.toString(),
+        classeId: classeId.toString(),
+        format: 'csv'
+      })
+
+      const response = await fetch(`/api/notes/export?${params}`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `notes_${subject.nommatiere}_${currentClass.className}_${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Failed to export notes:', errorData.error)
+        alert(`Erreur lors de l'export: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error('Export error:', error)
+      alert('Erreur de connexion lors de l\'export')
+    } finally {
+      setExporting(false)
+    }
   }
 
   return (
@@ -136,9 +176,17 @@ export default function NotesDetailPage() {
                   <Upload className="w-4 h-4 mr-2" />
                   Import Excel
                 </button>
-                <button className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors w-full sm:w-auto justify-center">
-                  <Download className="w-4 h-4 mr-2" />
-                  Exporter
+                <button 
+                  onClick={handleExport}
+                  disabled={exporting || !subject || !currentClass}
+                  className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400 text-gray-700 rounded-xl font-medium transition-colors w-full sm:w-auto justify-center"
+                >
+                  {exporting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  {exporting ? 'Export...' : 'Exporter'}
                 </button>
               </div>
             </div>

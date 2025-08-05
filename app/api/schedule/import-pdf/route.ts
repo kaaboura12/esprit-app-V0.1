@@ -159,7 +159,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  */
 async function callPythonScript(pdfPath: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    const pythonProcess = spawn('python', ['extract_schedule.py', pdfPath])
+    const pythonProcess = spawn('./venv/bin/python3', ['extract_schedule.py', pdfPath])
     
     let output = ''
     let errorOutput = ''

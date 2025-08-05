@@ -42,6 +42,7 @@ export default function GestionEtudiantsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
   const [showExcelModal, setShowExcelModal] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<any>(null)
   const [showStudentDetails, setShowStudentDetails] = useState(false)
   const [addStudentError, setAddStudentError] = useState<string | null>(null)
@@ -106,6 +107,43 @@ export default function GestionEtudiantsPage() {
     setShowStudentDetails(true)
   }
 
+  const handleExport = async () => {
+    if (!selectedClassId || !classeName) return
+    
+    setExporting(true)
+    try {
+      const params = new URLSearchParams({
+        classeId: selectedClassId.toString()
+      })
+
+      const response = await fetch(`/api/students/export?${params}`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `etudiants_${classeName}_${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Failed to export students:', errorData.error)
+        alert(`Erreur lors de l'export: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error('Export error:', error)
+      alert('Erreur de connexion lors de l\'export')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
@@ -147,9 +185,17 @@ export default function GestionEtudiantsPage() {
                   <Upload className="w-4 h-4 mr-2" />
                   Import Excel
                 </button>
-                <button className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors w-full sm:w-auto justify-center">
-                  <Download className="w-4 h-4 mr-2" />
-                  Exporter
+                <button 
+                  onClick={handleExport}
+                  disabled={exporting || !selectedClassId || !classeName}
+                  className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400 text-gray-700 rounded-xl font-medium transition-colors w-full sm:w-auto justify-center"
+                >
+                  {exporting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  {exporting ? 'Export...' : 'Exporter'}
                 </button>
                 <button 
                   onClick={() => setShowAddModal(true)}

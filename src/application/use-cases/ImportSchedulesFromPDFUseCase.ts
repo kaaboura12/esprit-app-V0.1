@@ -44,7 +44,8 @@ export class ImportSchedulesFromPDFUseCase {
               await this.processEvent(event, scheduleDate, teacherId)
               successCount++
             } catch (error) {
-              errors.push(`Error processing event: ${error instanceof Error ? error.message : 'Unknown error'}`)
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+              errors.push(`Error processing event (${event.subject || 'Unknown'}): ${errorMessage}`)
             }
           }
         } catch (error) {
@@ -78,15 +79,18 @@ export class ImportSchedulesFromPDFUseCase {
     const normalizedMatiereName = this.normalizeMatiereName(event.subject)
 
     // Look up class and subject IDs
+    console.log(`Looking for class: "${normalizedClasseName}"`)
+    console.log(`Looking for subject: "${normalizedMatiereName}"`)
+    
     const classeId = await this.scheduleRepository.findClasseIdByName(normalizedClasseName)
     const matiereId = await this.scheduleRepository.findMatiereIdByName(normalizedMatiereName)
 
     if (!classeId) {
-      throw new Error(`Class not found: ${normalizedClasseName}`)
+      throw new Error(`Class not found: "${normalizedClasseName}"`)
     }
 
     if (!matiereId) {
-      throw new Error(`Subject not found: ${normalizedMatiereName}`)
+      throw new Error(`Subject not found: "${normalizedMatiereName}"`)
     }
 
     // Parse time slot

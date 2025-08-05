@@ -94,8 +94,7 @@ export class MySQLStudentRepository implements StudentRepository {
             email: etudiant.getEmailValue(),
             classe_id: etudiant.getClasseId(),
             numero_etudiant: etudiant.getNumeroEtudiantValue(),
-            date_naissance: etudiant.getDateNaissance(),
-            is_active: 1
+            date_naissance: etudiant.getDateNaissance()
           }
         ])
         .select('*')
@@ -206,8 +205,7 @@ export class MySQLStudentRepository implements StudentRepository {
               email: etudiant.getEmailValue(),
               classe_id: etudiant.getClasseId(),
               numero_etudiant: etudiant.getNumeroEtudiantValue(),
-              date_naissance: etudiant.getDateNaissance(),
-              is_active: 1
+              date_naissance: etudiant.getDateNaissance()
             }
           ])
         if (error) {
@@ -227,7 +225,7 @@ export class MySQLStudentRepository implements StudentRepository {
     try {
       const { error } = await supabase
         .from('etudiant')
-        .update({ is_active: 0, updated_at: new Date().toISOString() })
+        .delete()
         .eq('id', id)
       if (error) throw error
     } catch (error) {

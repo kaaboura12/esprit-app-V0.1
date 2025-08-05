@@ -121,10 +121,26 @@ export class MySQLScheduleRepository implements ScheduleRepository {
 
   async createSchedule(schedule: Omit<Schedule, 'id' | 'createdAt' | 'updatedAt'>): Promise<Schedule> {
     try {
+      // Try to get the next available ID first
+      const { data: maxIdResult, error: maxIdError } = await supabase
+        .from('schedule')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1)
+        .single()
+      
+      let nextId = 1
+      if (!maxIdError && maxIdResult) {
+        nextId = maxIdResult.id + 1
+      }
+      
+      console.log('Next available schedule ID:', nextId)
+      
       const { data, error } = await supabase
         .from('schedule')
         .insert([
           {
+            id: nextId,
             teacher_id: schedule.getTeacherId(),
             matiere_id: schedule.getMatiereId(),
             classe_id: schedule.getClasseId(),
@@ -259,7 +275,8 @@ export class MySQLScheduleRepository implements ScheduleRepository {
       const { data, error } = await supabase
         .from('classe')
         .select('id')
-        .eq('nom_classe', nomClasse)
+        .ilike('nom_classe', nomClasse)
+        .limit(1)
         .maybeSingle()
       if (error) throw error
       return data ? data.id : null
@@ -274,7 +291,8 @@ export class MySQLScheduleRepository implements ScheduleRepository {
       const { data, error } = await supabase
         .from('matiere')
         .select('id')
-        .eq('nommatiere', nomMatiere)
+        .ilike('nommatiere', nomMatiere)
+        .limit(1)
         .maybeSingle()
       if (error) throw error
       return data ? data.id : null

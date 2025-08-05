@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const { data, error } = await supabase
       .from('matiere')
-      .select('id, nommatiere')
+      .select('id, nommatiere, coefficient')
       .order('nommatiere')
 
     if (error) {

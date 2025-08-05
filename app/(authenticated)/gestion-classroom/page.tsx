@@ -35,15 +35,36 @@ export default function GestionClassroomPage() {
   const grayBorder = 'border-[#e5e7eb]'
   const grayText = 'text-[#374151]'
 
-  // Placeholder: Replace with real API call
   const handleAddClass = async (data: AddClassFormData) => {
     setIsAddingClass(true)
     try {
-      // TODO: Replace with real API call
-      await new Promise(res => setTimeout(res, 1000))
+      const response = await fetch('/api/classes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          className: data.className,
+          bloc: data.bloc,
+          subjectId: data.subjectId
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erreur lors de l\'ajout de la classe')
+      }
+
+      const result = await response.json()
+      console.log('Classe ajoutée avec succès:', result)
+      
       // After adding, refresh the class list
       refreshClasses()
       setShowAddClassModal(false)
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la classe:', error)
+      throw error
     } finally {
       setIsAddingClass(false)
     }
