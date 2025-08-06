@@ -8,7 +8,8 @@ export class AuthToken {
     private readonly teacherId: number,
     private readonly email: string,
     private readonly issuedAt: Date,
-    private readonly expiresAt: Date
+    private readonly expiresAt: Date,
+    private readonly role: string = 'teacher'
   ) {}
 
   getToken(): string {
@@ -21,6 +22,10 @@ export class AuthToken {
 
   getEmail(): string {
     return this.email
+  }
+
+  getRole(): string {
+    return this.role
   }
 
   getIssuedAt(): Date {
@@ -54,5 +59,15 @@ export class AuthToken {
     const now = new Date()
     const timeDiff = this.expiresAt.getTime() - now.getTime()
     return Math.max(0, Math.floor(timeDiff / (1000 * 60)))
+  }
+
+  // Business rule: Check if user has admin role
+  isAdmin(): boolean {
+    return this.role === 'admin'
+  }
+
+  // Business rule: Check if user has teacher role
+  isTeacher(): boolean {
+    return this.role === 'teacher'
   }
 } 

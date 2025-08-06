@@ -14,6 +14,7 @@ export interface AuthenticatedRequest extends NextRequest {
     firstname: string
     lastname: string
     departement: string
+    role: string
   }
 }
 
@@ -59,7 +60,8 @@ export async function authMiddleware(request: NextRequest): Promise<{
     // Extract teacher information from token
     const teacher = {
       id: result.authToken.getTeacherId(),
-      email: result.authToken.getEmail()
+      email: result.authToken.getEmail(),
+      role: result.authToken.getRole()
     }
 
     return {
@@ -87,6 +89,36 @@ export function withAuth(handler: (req: AuthenticatedRequest) => Promise<NextRes
       return NextResponse.json(
         { error: authResult.error || 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    // Add teacher info to request
+    const authenticatedRequest = request as AuthenticatedRequest
+    authenticatedRequest.teacher = authResult.teacher
+
+    return handler(authenticatedRequest)
+  }
+}
+
+/**
+ * Higher-order function to protect admin-only API routes
+ */
+export function withAdminAuth(handler: (req: AuthenticatedRequest) => Promise<NextResponse>) {
+  return async (request: NextRequest): Promise<NextResponse> => {
+    const authResult = await authMiddleware(request)
+
+    if (!authResult.isAuthenticated) {
+      return NextResponse.json(
+        { error: authResult.error || 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Check if user has admin role
+    if (authResult.teacher?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Access denied. Admin privileges required.' },
+        { status: 403 }
       )
     }
 

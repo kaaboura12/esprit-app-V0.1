@@ -14,7 +14,7 @@ export class MySQLTeacherRepository implements TeacherRepository {
     try {
       const { data, error } = await supabase
         .from('teacher')
-        .select('id, firstname, lastname, email, departement, motdepasse, photo_url')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url, role')
         .eq('id', id)
         .eq('is_active', 1)
         .maybeSingle()
@@ -27,7 +27,8 @@ export class MySQLTeacherRepository implements TeacherRepository {
         new Email(data.email),
         data.departement,
         data.motdepasse,
-        data.photo_url
+        data.photo_url,
+        data.role || 'teacher'
       )
     } catch (error) {
       console.error('Error finding teacher by ID:', error)
@@ -40,7 +41,7 @@ export class MySQLTeacherRepository implements TeacherRepository {
       const emailVO = new Email(email)
       const { data, error } = await supabase
         .from('teacher')
-        .select('id, firstname, lastname, email, departement, motdepasse, photo_url')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url, role')
         .eq('email', emailVO.getValue())
         .eq('is_active', 1)
         .maybeSingle()
@@ -53,7 +54,8 @@ export class MySQLTeacherRepository implements TeacherRepository {
         emailVO,
         data.departement,
         data.motdepasse,
-        data.photo_url
+        data.photo_url,
+        data.role || 'teacher'
       )
     } catch (error) {
       console.error('Error finding teacher by email:', error)
@@ -76,6 +78,7 @@ export class MySQLTeacherRepository implements TeacherRepository {
             departement: teacher.getDepartement(),
             motdepasse: teacher.getHashedPassword(),
             photo_url: teacher.getPhotoUrl(),
+            role: teacher.getRole(),
             updated_at: new Date().toISOString()
           })
           .eq('id', teacher.getId())
@@ -97,6 +100,7 @@ export class MySQLTeacherRepository implements TeacherRepository {
               departement: teacher.getDepartement(),
               motdepasse: teacher.getHashedPassword(),
               photo_url: teacher.getPhotoUrl(),
+              role: teacher.getRole(),
               is_active: 1
             }
           ])
@@ -131,7 +135,7 @@ export class MySQLTeacherRepository implements TeacherRepository {
     try {
       const { data, error } = await supabase
         .from('teacher')
-        .select('id, firstname, lastname, email, departement, motdepasse, photo_url')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url, role')
         .eq('is_active', 1)
         .order('lastname', { ascending: true })
         .order('firstname', { ascending: true })
@@ -144,7 +148,8 @@ export class MySQLTeacherRepository implements TeacherRepository {
         new Email(teacherData.email),
         teacherData.departement,
         teacherData.motdepasse,
-        teacherData.photo_url
+        teacherData.photo_url,
+        teacherData.role || 'teacher'
       ))
     } catch (error) {
       console.error('Error getting all teachers:', error)
@@ -156,7 +161,7 @@ export class MySQLTeacherRepository implements TeacherRepository {
     try {
       const { data, error } = await supabase
         .from('teacher')
-        .select('id, firstname, lastname, email, departement, motdepasse, photo_url')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url, role')
         .eq('departement', departement)
         .eq('is_active', 1)
         .order('lastname', { ascending: true })
@@ -170,7 +175,8 @@ export class MySQLTeacherRepository implements TeacherRepository {
         new Email(teacherData.email),
         teacherData.departement,
         teacherData.motdepasse,
-        teacherData.photo_url
+        teacherData.photo_url,
+        teacherData.role || 'teacher'
       ))
     } catch (error) {
       console.error('Error finding teachers by department:', error)

@@ -34,7 +34,7 @@ export function AddClassModal({ isOpen, onClose, onSubmit, isLoading = false }: 
     subjectName: '',
     coefficient: 1
   })
-  const [errors, setErrors] = useState<Partial<AddClassFormData>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSubjectDropdown, setShowSubjectDropdown] = useState(false)
   const [showClassDropdown, setShowClassDropdown] = useState(false)
@@ -62,7 +62,11 @@ export function AddClassModal({ isOpen, onClose, onSubmit, isLoading = false }: 
   const handleInputChange = (field: keyof AddClassFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
     }
   }
 
@@ -92,10 +96,18 @@ export function AddClassModal({ isOpen, onClose, onSubmit, isLoading = false }: 
     }))
     setShowSubjectDropdown(false)
     if (errors.subjectName) {
-      setErrors(prev => ({ ...prev, subjectName: undefined }))
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors.subjectName
+        return newErrors
+      })
     }
     if (errors.coefficient) {
-      setErrors(prev => ({ ...prev, coefficient: undefined }))
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors.coefficient
+        return newErrors
+      })
     }
   }
 
@@ -107,29 +119,30 @@ export function AddClassModal({ isOpen, onClose, onSubmit, isLoading = false }: 
     }))
     setShowClassDropdown(false)
     if (errors.className) {
-      setErrors(prev => ({ ...prev, className: undefined }))
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors.className
+        return newErrors
+      })
     }
     if (errors.bloc) {
-      setErrors(prev => ({ ...prev, bloc: undefined }))
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors.bloc
+        return newErrors
+      })
     }
   }
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<AddClassFormData> = {}
+    const newErrors: Record<string, string> = {}
     if (!formData.className.trim()) newErrors.className = 'Le nom de la classe est requis'
     if (!formData.bloc.trim()) newErrors.bloc = 'Le bloc est requis'
     if (!formData.subjectId || formData.subjectId === 0) newErrors.subjectName = 'La matière est requise'
     if (!formData.maxStudents || formData.maxStudents < 1) newErrors.maxStudents = 'Nombre d\'étudiants invalide'
     
     // Convert coefficient to number and validate
-    // Handle both dot and comma decimal separators
-    let coefficientValue: number
-    if (typeof formData.coefficient === 'string') {
-      // Replace comma with dot for proper number parsing
-      coefficientValue = Number(formData.coefficient.replace(',', '.'))
-    } else {
-      coefficientValue = Number(formData.coefficient)
-    }
+    let coefficientValue: number = Number(formData.coefficient)
     
     console.log('Validating coefficient:', {
       original: formData.coefficient,

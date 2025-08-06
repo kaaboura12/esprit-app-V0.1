@@ -66,7 +66,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         lastname: teacher.getLastname(),
         email: teacher.getEmailValue(),
         departement: teacher.getDepartement(),
-        photoUrl: teacher.getPhotoUrl() || undefined
+        photoUrl: teacher.getPhotoUrl() || undefined,
+        role: teacher.getRole()
       },
       expiresAt: authToken.getExpiresAt().toISOString()
     }

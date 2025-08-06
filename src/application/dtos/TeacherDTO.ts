@@ -10,6 +10,7 @@ export interface TeacherDTO {
   email: string
   departement: string
   photoUrl?: string
+  role: string
 }
 
 export interface CreateTeacherRequestDTO {
@@ -19,6 +20,7 @@ export interface CreateTeacherRequestDTO {
   departement: string
   password: string
   photoUrl?: string
+  role?: string
 }
 
 export interface UpdateTeacherRequestDTO {
@@ -28,6 +30,7 @@ export interface UpdateTeacherRequestDTO {
   email?: string
   departement?: string
   photoUrl?: string
+  role?: string
 }
 
 export interface TeacherResponseDTO {
@@ -39,6 +42,7 @@ export interface TeacherResponseDTO {
   fullName: string
   hasProfilePhoto: boolean
   photoUrl?: string
+  role: string
 }
 
 export interface UpdatePhotoRequestDTO {
@@ -58,6 +62,7 @@ export interface UpdatePhotoResponseDTO {
     email: string
     departement: string
     photoUrl?: string
+    role: string
   }
 }
 

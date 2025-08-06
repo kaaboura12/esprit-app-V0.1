@@ -16,7 +16,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(false)
-  const { isAuthenticated, teacher, loading, logout } = useAuth()
+  const { isAuthenticated, teacher, loading, logout, isAdmin, canAccessAdminFeatures } = useAuth()
 
   const navigationItems = [
     {
@@ -24,23 +24,79 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
       href: "/gestion-classroom",
       icon: Users,
       description: "Gérer les salles de classe",
-      badge: "12"
+      badge: "12",
+      adminOnly: false,
+      teacherOnly: true
     },
     {
       name: "Gestion Emplois",
       href: "/gestion-emplois", 
       icon: Calendar,
       description: "Gérer les emplois du temps",
-      badge: null
+      badge: null,
+      adminOnly: false,
+      teacherOnly: true
     },
     {
       name: "Gestion Horaire",
       href: "/gestion-horraire",
       icon: Clock,
       description: "Gérer les horaires",
-      badge: "3"
+      badge: "3",
+      adminOnly: false,
+      teacherOnly: true
+    },
+    {
+      name: "Gestion Classes",
+      href: "/gestion-classes",
+      icon: BookOpen,
+      description: "Gérer toutes les classes",
+      badge: null,
+      adminOnly: true,
+      teacherOnly: false
+    },
+    {
+      name: "Gestion Étudiants",
+      href: "/gestion-etudiants-admin",
+      icon: Users,
+      description: "Gérer tous les étudiants",
+      badge: null,
+      adminOnly: true,
+      teacherOnly: false
+    },
+    {
+      name: "Gestion Matières",
+      href: "/gestion-matieres",
+      icon: BookOpen,
+      description: "Gérer toutes les matières",
+      badge: null,
+      adminOnly: true,
+      teacherOnly: false
+    },
+    {
+      name: "Gestion Enseignants",
+      href: "/gestion-teachers",
+      icon: Shield,
+      description: "Gérer les enseignants",
+      badge: null,
+      adminOnly: true,
+      teacherOnly: false
     }
   ]
+
+  // Filter navigation items based on user role
+  const filteredNavigationItems = navigationItems.filter(item => {
+    // If item is admin only, show only if user can access admin features
+    if (item.adminOnly) {
+      return canAccessAdminFeatures()
+    }
+    // If item is teacher only, show only if user is NOT admin (i.e., is a teacher)
+    if (item.teacherOnly) {
+      return !isAdmin()
+    }
+    // Otherwise show to everyone
+    return true
+  })
 
   const getInitials = (firstname: string, lastname: string) => {
     return `${firstname.charAt(0)}${lastname.charAt(0)}`.toUpperCase()
@@ -147,7 +203,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
                       </div>
                       <div className="text-sm text-gray-500 flex items-center space-x-2">
                         <Briefcase className="w-3 h-3" />
-                        <span>Enseignant</span>
+                        <span>{teacher.role === 'admin' ? 'Administrateur' : 'Enseignant'}</span>
                       </div>
                     </div>
                   </Link>
@@ -160,7 +216,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
                     </h3>
                   </div>
                   
-                  {navigationItems.map((item) => {
+                  {filteredNavigationItems.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href
                     
@@ -313,7 +369,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
                       </div>
                       <div className="text-sm text-gray-500 flex items-center space-x-2">
                         <Briefcase className="w-3 h-3" />
-                        <span>Enseignant</span>
+                        <span>{teacher.role === 'admin' ? 'Administrateur' : 'Enseignant'}</span>
                       </div>
                     </div>
                   </Link>
@@ -326,7 +382,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
                     </h3>
                   </div>
                   
-                  {navigationItems.map((item) => {
+                  {filteredNavigationItems.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href
                     
@@ -443,4 +499,62 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
       </div>
     </div>
   )
+}
+
+// Role-based access control component
+interface RoleGuardProps {
+  children: React.ReactNode
+  requiredRole?: 'admin' | 'teacher'
+  fallback?: React.ReactNode
+}
+
+export function RoleGuard({ children, requiredRole, fallback }: RoleGuardProps) {
+  const { isAuthenticated, teacher, loading, isAdmin, isTeacher } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="flex items-center space-x-3 text-gray-600">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span className="text-lg">Chargement...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated || !teacher) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Accès refusé</h1>
+          <p className="text-gray-600">Vous devez être connecté pour accéder à cette page.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (requiredRole === 'admin' && !isAdmin()) {
+    return fallback || (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Accès refusé</h1>
+          <p className="text-gray-600">Vous devez avoir les privilèges d'administrateur pour accéder à cette page.</p>
+          <p className="text-sm text-gray-500 mt-2">Rôle actuel: {teacher.role}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (requiredRole === 'teacher' && !isTeacher()) {
+    return fallback || (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Accès refusé</h1>
+          <p className="text-gray-600">Vous devez avoir le rôle d'enseignant pour accéder à cette page.</p>
+        </div>
+      </div>
+    )
+  }
+
+  return <>{children}</>
 } 

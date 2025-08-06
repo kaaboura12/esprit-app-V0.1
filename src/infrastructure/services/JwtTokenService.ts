@@ -41,6 +41,7 @@ export class JwtTokenService implements TokenService {
       lastname: teacher.getLastname(),
       departement: teacher.getDepartement(),
       photoUrl: teacher.getPhotoUrl(),
+      role: teacher.getRole(),
       iat: Math.floor(now.getTime() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000)
     }
@@ -70,6 +71,7 @@ export class JwtTokenService implements TokenService {
 
       const teacherId = Number(payload.teacherId)
       const email = String(payload.email)
+      const role = String(payload.role || 'teacher')
       const issuedAt = payload.iat ? new Date(Number(payload.iat) * 1000) : new Date()
       const expiresAt = new Date(Number(payload.exp) * 1000)
 
@@ -78,7 +80,8 @@ export class JwtTokenService implements TokenService {
         teacherId,
         email,
         issuedAt,
-        expiresAt
+        expiresAt,
+        role
       )
 
       return authToken.isValid() ? authToken : null

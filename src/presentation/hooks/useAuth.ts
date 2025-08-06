@@ -10,6 +10,7 @@ export interface AuthTeacher {
   email: string
   departement: string
   photoUrl?: string
+  role: string
 }
 
 /**
@@ -90,7 +91,8 @@ export function useAuth() {
               lastname: data.teacher.lastname || '',
               email: data.teacher.email,
               departement: data.teacher.departement || '',
-              photoUrl: data.teacher.photoUrl
+              photoUrl: data.teacher.photoUrl,
+              role: data.teacher.role || ''
             }
 
             setAuthState({
@@ -200,11 +202,33 @@ export function useAuth() {
     localStorage.setItem('teacher', JSON.stringify(updated))
   }
 
+  // Role checking helper functions
+  const isAdmin = () => {
+    return authState.teacher?.role === 'admin'
+  }
+
+  const isTeacher = () => {
+    return authState.teacher?.role === 'teacher'
+  }
+
+  const hasRole = (role: string) => {
+    return authState.teacher?.role === role
+  }
+
+  const canAccessAdminFeatures = () => {
+    return isAdmin() || authState.teacher?.departement.toLowerCase().includes('admin') || 
+           authState.teacher?.departement.toLowerCase().includes('direction')
+  }
+
   return {
     ...authState,
     logout,
     refreshAuth,
     updateTeacherPhoto,
-    updateTeacher
+    updateTeacher,
+    isAdmin,
+    isTeacher,
+    hasRole,
+    canAccessAdminFeatures
   }
 } 

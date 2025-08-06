@@ -13,7 +13,8 @@ export class Teacher {
     private readonly email: Email,
     private readonly departement: string,
     private readonly hashedPassword: string, // Store hashed password, not plain text
-    private readonly photoUrl?: string // Optional photo URL
+    private readonly photoUrl?: string, // Optional photo URL
+    private readonly role: string = 'teacher' // Default role is teacher
   ) {}
 
   getId(): number {
@@ -48,6 +49,20 @@ export class Teacher {
     return this.photoUrl || null
   }
 
+  getRole(): string {
+    return this.role
+  }
+
+  // Business rule: Check if teacher is admin
+  isAdmin(): boolean {
+    return this.role === 'admin'
+  }
+
+  // Business rule: Check if teacher is regular teacher
+  isTeacher(): boolean {
+    return this.role === 'teacher'
+  }
+
   // Business rule: Check if teacher has a profile photo
   hasProfilePhoto(): boolean {
     return this.photoUrl !== null && this.photoUrl !== undefined && this.photoUrl.trim().length > 0
@@ -73,6 +88,11 @@ export class Teacher {
     return this.departement.trim().length > 0
   }
 
+  // Business rule: Role validation
+  isValidRole(): boolean {
+    return ['teacher', 'admin'].includes(this.role)
+  }
+
   // Business rule: Photo URL validation
   isValidPhotoUrl(): boolean {
     if (!this.photoUrl) return true // Optional field
@@ -88,7 +108,8 @@ export class Teacher {
 
   // Business rule: Check if teacher can access admin features
   canAccessAdminFeatures(): boolean {
-    return this.departement.toLowerCase().includes('admin') || 
+    return this.isAdmin() || 
+           this.departement.toLowerCase().includes('admin') || 
            this.departement.toLowerCase().includes('direction')
   }
 
@@ -100,14 +121,15 @@ export class Teacher {
     email: string,
     departement: string,
     plainPassword: string,
-    photoUrl?: string
+    photoUrl?: string,
+    role: string = 'teacher'
   ): { teacher: Teacher, validatedPassword: Password } {
     const emailVO = new Email(email)
     const passwordVO = new Password(plainPassword)
     
     // Note: In real implementation, password would be hashed here
     // For now, we'll pass the plain password (should be hashed in infrastructure layer)
-    const teacher = new Teacher(id, firstname, lastname, emailVO, departement, plainPassword, photoUrl)
+    const teacher = new Teacher(id, firstname, lastname, emailVO, departement, plainPassword, photoUrl, role)
     
     return { teacher, validatedPassword: passwordVO }
   }
@@ -121,7 +143,22 @@ export class Teacher {
       this.email,
       this.departement,
       this.hashedPassword,
-      photoUrl
+      photoUrl,
+      this.role
+    )
+  }
+
+  // Factory method to create updated teacher with new role
+  withRole(role: string): Teacher {
+    return new Teacher(
+      this.id,
+      this.firstname,
+      this.lastname,
+      this.email,
+      this.departement,
+      this.hashedPassword,
+      this.photoUrl,
+      role
     )
   }
 } 

@@ -25,6 +25,7 @@ export interface AuthResponseDTO {
     email: string
     departement: string
     photoUrl?: string
+    role: string
   }
   expiresAt?: string // ISO string format
   error?: string
@@ -49,6 +50,7 @@ export interface ValidateTokenResponseDTO {
     email: string
     departement: string
     photoUrl?: string
+    role: string
   }
   expiresAt?: string
   error?: string

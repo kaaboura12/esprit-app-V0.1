@@ -57,7 +57,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         lastname: String(payload.lastname || ''),
         email: result.authToken.getEmail(),
         departement: String(payload.departement || ''),
-        photoUrl: payload.photoUrl ? String(payload.photoUrl) : undefined
+        photoUrl: payload.photoUrl ? String(payload.photoUrl) : undefined,
+        role: String(payload.role || 'teacher')
       },
       expiresAt: result.authToken.getExpiresAt().toISOString()
     }
@@ -120,7 +121,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         lastname: String(payload.lastname || ''),
         email: result.authToken.getEmail(),
         departement: String(payload.departement || ''),
-        photoUrl: payload.photoUrl ? String(payload.photoUrl) : undefined
+        photoUrl: payload.photoUrl ? String(payload.photoUrl) : undefined,
+        role: String(payload.role || 'teacher')
       },
       expiresAt: result.authToken.getExpiresAt().toISOString()
     }

@@ -15,7 +15,7 @@ export class MySQLAuthRepository implements AuthRepository {
     try {
       const { data, error } = await supabase
         .from('teacher')
-        .select('id, firstname, lastname, email, departement, motdepasse')
+        .select('id, firstname, lastname, email, departement, motdepasse, role')
         .eq('email', email.getValue())
         .eq('is_active', 1)
         .maybeSingle()
@@ -33,7 +33,9 @@ export class MySQLAuthRepository implements AuthRepository {
         data.lastname,
         email, // Use the email value object passed in
         data.departement,
-        data.motdepasse
+        data.motdepasse,
+        undefined, // photoUrl
+        data.role || 'teacher'
       )
       return teacher
     } catch (error) {
@@ -82,7 +84,7 @@ export class MySQLAuthRepository implements AuthRepository {
     try {
       const { data, error } = await supabase
         .from('teacher')
-        .select('id, firstname, lastname, email, departement, motdepasse')
+        .select('id, firstname, lastname, email, departement, motdepasse, role')
         .eq('id', id)
         .eq('is_active', 1)
         .maybeSingle()
@@ -99,7 +101,9 @@ export class MySQLAuthRepository implements AuthRepository {
         data.lastname,
         new Email(data.email),
         data.departement,
-        data.motdepasse
+        data.motdepasse,
+        undefined,
+        data.role || 'teacher'
       )
       return teacher
     } catch (error) {
@@ -112,7 +116,7 @@ export class MySQLAuthRepository implements AuthRepository {
     try {
       const { data, error } = await supabase
         .from('teacher')
-        .select('id, firstname, lastname, email, departement, motdepasse')
+        .select('id, firstname, lastname, email, departement, motdepasse, role')
         .eq('is_active', 1)
         .order('lastname', { ascending: true })
         .order('firstname', { ascending: true })
@@ -127,7 +131,9 @@ export class MySQLAuthRepository implements AuthRepository {
         teacherData.lastname,
         new Email(teacherData.email),
         teacherData.departement,
-        teacherData.motdepasse
+        teacherData.motdepasse,
+        undefined,
+        teacherData.role || 'teacher'
       ))
     } catch (error) {
       console.error('Error getting all teachers:', error)
@@ -140,31 +146,41 @@ export class MySQLAuthRepository implements AuthRepository {
     lastname: string,
     email: string,
     departement: string,
-    plainPassword: string
+    plainPassword: string,
+    role: string = 'teacher'
   ): Promise<Teacher> {
     try {
       const emailVO = new Email(email)
       const hashedPassword = await this.hashPassword(plainPassword)
+      
+      // First, try without the role column to see if that's the issue
+      const insertData: any = {
+        firstname,
+        lastname,
+        email: emailVO.getValue(),
+        departement,
+        motdepasse: hashedPassword,
+        is_active: 1
+      }
+      
+      // Only add role if it's not the default 'teacher'
+      if (role !== 'teacher') {
+        insertData.role = role
+      }
+      
       const { data, error } = await supabase
         .from('teacher')
-        .insert([
-          {
-            firstname,
-            lastname,
-            email: emailVO.getValue(),
-            departement,
-            motdepasse: hashedPassword,
-            is_active: 1
-          }
-        ])
+        .insert([insertData])
         .select('id')
         .single()
+        
       if (error) {
         if (error.code === '23505' || error.message.includes('duplicate')) {
           throw new Error('A teacher with this email already exists')
         }
-        throw new Error('Database error occurred while creating teacher')
+        throw new Error(`Database error occurred while creating teacher: ${error.message}`)
       }
+      
       const teacherId = data.id
       const teacher = new Teacher(
         teacherId,
@@ -172,7 +188,9 @@ export class MySQLAuthRepository implements AuthRepository {
         lastname,
         emailVO,
         departement,
-        hashedPassword
+        hashedPassword,
+        undefined,
+        role
       )
       return teacher
     } catch (error) {
