@@ -161,4 +161,18 @@ export class Teacher {
       role
     )
   }
+
+  // Factory method to create updated teacher with new password (expects hashed password)
+  withNewPassword(hashedPassword: string): Teacher {
+    return new Teacher(
+      this.id,
+      this.firstname,
+      this.lastname,
+      this.email,
+      this.departement,
+      hashedPassword,
+      this.photoUrl,
+      this.role
+    )
+  }
 } 

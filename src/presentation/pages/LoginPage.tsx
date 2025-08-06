@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, ShieldCheck, Sparkles } from "lucide-react"
 import { useState } from "react"
 import { LoginRequestDTO, AuthResponseDTO } from "@/application/dtos/AuthDTO"
+import { PasswordResetModal } from "@/presentation/components/PasswordResetModal"
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -13,6 +14,9 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [rememberMe, setRememberMe] = useState(false)
+  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false)
+  const [forgotPasswordMessage, setForgotPasswordMessage] = useState<string | null>(null)
+  const [showPasswordResetModal, setShowPasswordResetModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,6 +57,41 @@ export function LoginPage() {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Veuillez saisir votre adresse email d\'abord')
+      return
+    }
+
+    setIsForgotPasswordLoading(true)
+    setError(null)
+    setForgotPasswordMessage(null)
+
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setForgotPasswordMessage(data.message)
+        setShowPasswordResetModal(true)
+      } else {
+        setError(data.error || 'Une erreur est survenue')
+      }
+    } catch (err) {
+      console.error('Forgot password error:', err)
+      setError('Erreur réseau. Veuillez vérifier votre connexion et réessayer.')
+    } finally {
+      setIsForgotPasswordLoading(false)
     }
   }
 
@@ -115,6 +154,13 @@ export function LoginPage() {
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                   <p className="text-red-600 text-sm font-medium">{error}</p>
+                </div>
+              )}
+
+              {/* Success Message */}
+              {forgotPasswordMessage && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                  <p className="text-green-600 text-sm font-medium">{forgotPasswordMessage}</p>
                 </div>
               )}
 
@@ -192,12 +238,21 @@ export function LoginPage() {
                       Se souvenir de moi
                     </label>
                   </div>
-                  {rememberMe && (
-                    <div className="flex items-center space-x-1 text-xs text-green-600">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="font-medium">30 jours</span>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={isForgotPasswordLoading || !email}
+                    className="text-sm text-red-500 hover:text-red-600 transition-colors font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isForgotPasswordLoading ? (
+                      <span className="flex items-center">
+                        <div className="w-3 h-3 border border-red-300 border-t-red-500 rounded-full animate-spin mr-1"></div>
+                        Envoi...
+                      </span>
+                    ) : (
+                      'Mot de passe oublié ?'
+                    )}
+                  </button>
                 </div>
 
                 {/* Enhanced Sign In Button */}
@@ -251,6 +306,13 @@ export function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* Password Reset Modal */}
+      <PasswordResetModal
+        isOpen={showPasswordResetModal}
+        onClose={() => setShowPasswordResetModal(false)}
+        email={email}
+      />
     </div>
   )
 } 

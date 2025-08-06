@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAdminClasses } from '@/presentation/hooks/useAdminClasses'
 import { RoleGuard } from '@/presentation/components/SideNavLayout'
+import { AddClassModalAdmin, AddClassFormData } from '@/presentation/components/AddClassModalAdmin'
 import { 
   BookOpen, 
   Users, 
@@ -42,6 +43,10 @@ export default function GestionClassesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClass, setSelectedClass] = useState<any>(null)
   const [showClassDetails, setShowClassDetails] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [isAddingClass, setIsAddingClass] = useState(false)
+  const [addClassError, setAddClassError] = useState<string | null>(null)
+  const [addClassSuccess, setAddClassSuccess] = useState<string | null>(null)
 
   // Filter classes based on search
   const filteredClasses = classes.filter(classe => {
@@ -85,6 +90,47 @@ export default function GestionClassesPage() {
     return `${firstname} ${lastname}`
   }
 
+  const handleAddClass = async (classData: AddClassFormData) => {
+    setIsAddingClass(true)
+    setAddClassError(null)
+    setAddClassSuccess(null)
+    
+    try {
+      const response = await fetch('/api/admin/classes/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(classData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erreur lors de la création de la classe')
+      }
+
+      const result = await response.json()
+      console.log('Classe créée avec succès:', result)
+      
+      // Show success message
+      setAddClassSuccess(`Classe ${classData.nomClasse} créée avec succès!`)
+      
+      // Refresh the classes list
+      await refreshClasses()
+      setShowAddModal(false)
+      
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => setAddClassSuccess(null), 3000)
+    } catch (error) {
+      console.error('Erreur lors de la création de la classe:', error)
+      setAddClassError(error instanceof Error ? error.message : 'Erreur lors de la création de la classe')
+      throw error
+    } finally {
+      setIsAddingClass(false)
+    }
+  }
+
   return (
     <RoleGuard requiredRole="admin">
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
@@ -105,16 +151,11 @@ export default function GestionClassesPage() {
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto mt-2 md:mt-0">
                 <button 
-                  onClick={refreshClasses}
-                  disabled={loading}
-                  className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors w-full sm:w-auto justify-center"
+                  onClick={() => setShowAddModal(true)}
+                  className="inline-flex items-center px-4 sm:px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors shadow-lg w-full sm:w-auto justify-center"
                 >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Activity className="w-4 h-4 mr-2" />
-                  )}
-                  {loading ? 'Chargement...' : 'Actualiser'}
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter Classe
                 </button>
               </div>
             </div>
@@ -443,6 +484,54 @@ export default function GestionClassesPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Add Class Modal */}
+      {showAddModal && (
+        <AddClassModalAdmin
+          isOpen={showAddModal}
+          onClose={() => {
+            setShowAddModal(false)
+            setAddClassError(null)
+            setAddClassSuccess(null)
+          }}
+          onSubmit={handleAddClass}
+          isLoading={isAddingClass}
+        />
+      )}
+
+      {/* Error Message Toast */}
+      {addClassError && (
+        <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-lg z-50 max-w-md">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <span className="font-medium">Erreur</span>
+          </div>
+          <p className="text-sm mt-1">{addClassError}</p>
+          <button
+            onClick={() => setAddClassError(null)}
+            className="absolute top-2 right-2 text-red-400 hover:text-red-600"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Success Message Toast */}
+      {addClassSuccess && (
+        <div className="fixed top-4 right-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl shadow-lg z-50 max-w-md">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            <span className="font-medium">Succès</span>
+          </div>
+          <p className="text-sm mt-1">{addClassSuccess}</p>
+          <button
+            onClick={() => setAddClassSuccess(null)}
+            className="absolute top-2 right-2 text-green-400 hover:text-green-600"
+          >
+            ✕
+          </button>
         </div>
       )}
     </RoleGuard>
