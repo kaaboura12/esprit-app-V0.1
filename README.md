@@ -1,202 +1,272 @@
 # Esprit Education Management System
 
-A comprehensive education management system built with Next.js, TypeScript, and Supabase, featuring role-based access control for teachers and administrators.
+A full-stack education management platform built with Next.js, TypeScript, and Supabase, featuring robust role-based access (Teacher/Admin), modern UI, Excel/PDF imports, and secure authentication.
 
-## 🚀 Features
+> Internship project at Esprit University by Sayari Mohamed Amin. Encadrant: Ghassen Klai.
 
-### Core Functionality
-- **Classroom Management** - Manage classrooms and class assignments
-- **Schedule Management** - Handle class schedules and timetables
-- **Student Management** - Comprehensive student information system
-- **Grade Management** - Track and manage student grades
-- **Teacher Management** - Manage teacher profiles and assignments
+## ✨ Highlights
 
-### Role-Based Access Control
-- **Teacher Role** - Basic access to classroom and schedule management
-- **Admin Role** - Full access including student and teacher management
-- **Secure Authentication** - JWT-based authentication with role validation
-- **Protected Routes** - Role-based route protection and middleware
+- Modern Next.js 15 + React 19 app with Tailwind CSS 4
+- Clean Architecture (Domain, Application, Infrastructure, Presentation)
+- JWT authentication with secure `auth_token` cookies
+- Teacher and Admin roles with protected API routes and UI
+- Students, Teachers, Classes, Subjects, Notes, Schedules modules
+- Excel import/export for students and grades
+- PDF schedule extraction (Python `pdfplumber`)
+- Email-based password reset with verification codes (Gmail)
+- Supabase as the database/storage layer
 
-### Advanced Features
-- **Excel Import/Export** - Bulk data operations for students and grades
-- **PDF Schedule Import** - Automated schedule processing from PDF files
-- **Real-time Updates** - Live data synchronization
-- **Responsive Design** - Mobile-friendly interface
-- **Email Validation** - Domain-level validation
-- **Last Login Tracking** - Audit trail for security
+## 🧱 Tech Stack
 
-## 📊 Database Schema
+- Framework: Next.js 15, React 19, TypeScript 5
+- Styling: Tailwind CSS 4
+- Auth: jose (JWT), httpOnly cookies
+- DB/Storage: Supabase (`@supabase/supabase-js`)
+- Email: Nodemailer (Gmail App Password)
+- Files: Multer-like FormData handling in Next API routes
+- Data import: `xlsx`
+- Schedules: PDF parsing via Python (`pdfplumber`) executed from Node
 
-### Teacher Table
-- `id` - Auto-increment primary key
-- `firstname` - Teacher's first name
-- `lastname` - Teacher's last name  
-- `email` - Unique email address (login identifier)
-- `departement` - Academic department
-- `motdepasse` - Bcrypt hashed password
-- `role` - User role ('teacher' or 'admin')
-- `is_active` - Soft delete flag
-- `last_login` - Last authentication timestamp
-- `created_at` - Record creation timestamp
-- `updated_at` - Record modification timestamp
+## 🔐 Roles & Access
 
-### Student Table (Etudiant)
-- `id` - Auto-increment primary key
-- `firstname` - Student's first name
-- `lastname` - Student's last name
-- `email` - Unique email address
-- `classe_id` - Foreign key to classe table
-- `numero_etudiant` - Unique student number
-- `date_naissance` - Birth date (optional)
-- `is_active` - Soft delete flag
-- `created_at` - Record creation timestamp
-- `updated_at` - Record modification timestamp
+- Teacher
+  - View/manage assigned classrooms and schedules
+  - Manage assigned subjects and enter/update grades
+  - Update profile photo
+- Admin
+  - All teacher features
+  - Manage students, teachers (roles), classes, subjects, notes
+  - Import/export students and notes
+  - Access system-wide statistics
 
-### Class Table (Classe)
-- `id` - Auto-increment primary key
-- `nom` - Class name
-- `niveau` - Academic level
-- `specialite` - Specialization
-- `bloc` - Building block
-- `capacite_max` - Maximum capacity
-- `is_active` - Soft delete flag
+## ⚙️ Environment Variables
 
-## 🔧 API Endpoints
+Create `.env.local` from the example below (or run: `cp .env.example .env.local`).
 
-### Authentication
-- `POST /api/auth/login` - Teacher authentication
-- `GET/POST /api/auth/validate` - Token validation
-- `POST /api/auth/logout` - Logout (clear cookies)
+```bash
+# Supabase
+SUPABASE_URL="https://YOUR-PROJECT.supabase.co"
+SUPABASE_KEY="YOUR_SERVICE_ROLE_OR_ANON_KEY"
 
-### Students (Admin Only)
-- `GET /api/students` - Get students by class
-- `POST /api/students` - Add new student
-- `POST /api/students/import-excel` - Import students from Excel
-- `GET /api/students/import-excel` - Get import format info
+# JWT
+JWT_SECRET="change_me_in_production"
 
-### Teachers
-- `GET /api/teachers` - Get all teachers (with roles)
-- `POST /api/teachers` - Create new teacher
-- `POST /api/teachers/upload-photo` - Upload teacher photo
-- `POST /api/teachers/update-role` - Update teacher role (Admin only)
-- `GET /api/teachers/classes` - Get teacher's classes
-
-### Notes (Admin Only)
-- `GET /api/notes/subjects` - Get subjects
-- `GET /api/notes/students` - Get students for notes
-- `POST /api/notes/update` - Update student notes
-- `POST /api/notes/import-excel` - Import notes from Excel
-- `GET /api/notes/export` - Export notes to CSV
-
-## 🔒 Security Features
-
-- **Role-Based Access Control** - Teacher and Admin roles with different permissions
-- **JWT Authentication** - Secure token-based authentication
-- **Route Protection** - Middleware-based route protection
-- **Input Validation** - Email and password value objects
-- **SQL Injection Protection** - Parameterized queries
-- **Password Hashing** - Bcrypt password hashing
-
-## 🏃‍♂️ Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-## 📋 Database Migration
-
-To add role-based functionality to an existing database, run the following SQL migration:
-
-```sql
--- Add role column to teacher table
-ALTER TABLE teacher 
-ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'teacher' 
-CHECK (role IN ('teacher', 'admin'));
-
--- Update existing teachers to have 'teacher' role by default
-UPDATE teacher 
-SET role = 'teacher' 
-WHERE role IS NULL OR role = '';
-
--- Create an index on the role column for better performance
-CREATE INDEX idx_teacher_role ON teacher(role);
+# Gmail (App Password required)
+GMAIL_USER="your.address@gmail.com"
+GMAIL_APP_PASSWORD="your_gmail_app_password"
 ```
 
-## 🎯 Role Permissions
-
-### Teacher Role
-- View and manage assigned classrooms
-- View and manage class schedules
-- View and manage class timetables
-- Update personal profile and photo
-
-### Admin Role
-- All Teacher permissions
-- Manage all students (add, edit, delete, import/export)
-- Manage all teachers (view, update roles)
-- Manage all grades and notes
-- Access to system-wide statistics and reports
-- Import/export functionality for all data
+Notes:
+- `SUPABASE_KEY`: Prefer a restricted service role for server-side operations.
+- JWT is used for signing/validating tokens (`src/infrastructure/services/JwtTokenService.ts`).
 
 ## 🚀 Getting Started
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd esprit-app-V0.1-main
-   ```
+1) Install dependencies
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your Supabase credentials
-   ```
+2) Set up environment
 
-4. **Run database migration**
-   ```bash
-   # Execute the database_migration.sql script in your Supabase database
-   ```
+```bash
+cp .env.example .env.local
+# Fill in values for Supabase, JWT, Gmail
+```
 
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+3) (Optional) Set up Python virtualenv for PDF import
 
-6. **Create an admin user**
-   - Register a new teacher account
-   - Use the database migration script to set the role to 'admin'
-   - Or use the teacher management interface (if you have admin access)
+```bash
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt
+# The app runs the script via ./venv/bin/python3 extract_schedule.py
+```
 
-## 📱 Usage
+4) Run the dev server
 
-1. **Login** - Use your email and password to access the system
-2. **Role-based Navigation** - The sidebar will show different options based on your role
-3. **Teacher Features** - Manage classrooms, schedules, and personal profile
-4. **Admin Features** - Access to all features including student and teacher management
+```bash
+npm run dev
+```
 
-## 🔧 Architecture
+App will be available at http://localhost:3000
 
-The application follows a clean architecture pattern with:
+## 📦 NPM Scripts
 
-- **Domain Layer** - Core business entities and value objects
-- **Application Layer** - Use cases and DTOs
-- **Infrastructure Layer** - Repositories, services, and external integrations
-- **Presentation Layer** - React components and hooks
+- `npm run dev` - Start development server (Turbopack)
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - ESLint
 
-## 🤝 Contributing
+## 🧭 App Structure (Clean Architecture)
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+- `src/core` - Entities, value objects, and interfaces
+- `src/application` - Use-cases and DTOs
+- `src/infrastructure` - Supabase config, repositories, services (JWT, Email, Excel/PDF)
+- `src/presentation` - UI components, pages, hooks
+- `app` - Next.js App Router (UI routes and API routes)
+
+## 🗄️ Database Model (Supabase)
+
+- Teacher (`teacher`)
+  - id, firstname, lastname, email (unique), departement, motdepasse (bcrypt), photo_url, role ('teacher'|'admin'), is_active, last_login, created_at, updated_at
+- Student (`etudiant`)
+  - id, firstname, lastname, email (unique), classe_id, numero_etudiant (unique), date_naissance, is_active, created_at, updated_at
+- Class (`classe`)
+  - id, nom_classe, bloc, numclasse, nbre_etudiant_max, nbre_etudiant_actuel
+- Subject (`matiere`)
+  - id, nommatiere, description, coefficient
+- Teacher-Class-Subject (`teacher_classe`)
+  - id, teacher_id, classe_id, matiere_id
+- Notes (`note_finale`)
+  - id, etudiant_id, matiere_id, teacher_id, note_cc, note_tp, note_dv, note_finale
+- Note Config (`note_config`)
+  - id, matiere_id, pourcentage_cc, pourcentage_tp, pourcentage_dv
+- Password Reset (`password_reset_tokens`)
+  - id, email, code, expires_at, is_used, created_at
+- Schedule (`schedule`)
+  - id, teacher_id, matiere_id, classe_id, schedule_date, week_start_date, start_time, end_time, session_type, notes, is_cancelled, created_at, updated_at
+
+> All repository implementations use Supabase (`src/infrastructure/repositories/*`).
+
+## 🔒 Security
+
+- JWT auth with httpOnly cookies (`auth_token`)
+- Middleware-protected routes (`middleware.ts` + `withAuth`/`withAdminAuth`)
+- Strong password hashing (bcryptjs)
+- DTO-based validation at API boundaries
+- Parameterized queries via Supabase client
+
+## 🔑 Authentication Flow
+
+- Login: `POST /api/auth/login` → issues JWT, sets `auth_token` cookie (24h or 30d with remember me)
+- Validate: `GET|POST /api/auth/validate` → validates token and returns teacher info
+- Logout: `POST /api/auth/logout` → clears cookie
+- Forgot Password: `POST /api/auth/forgot-password` → sends code by email
+- Verify Reset Code: `POST /api/auth/verify-reset-code`
+- Reset Password: `POST /api/auth/reset-password`
+
+## 📚 API Endpoints (Implemented)
+
+Authentication
+- `POST /api/auth/login`
+- `GET /api/auth/validate`
+- `POST /api/auth/validate`
+- `POST /api/auth/logout`
+- `POST /api/auth/forgot-password`
+- `POST /api/auth/verify-reset-code`
+- `POST /api/auth/reset-password`
+
+Teachers
+- `GET /api/teachers` (auth)
+- `POST /api/teachers` (auth) - create teacher (optional `role`)
+- `POST /api/teachers/update-role` (admin)
+- `POST /api/teachers/upload-photo` (auth)
+- `GET /api/teachers/classes` (auth)
+
+Students
+- `GET /api/students?classeId=...` (auth)
+- `POST /api/students` (auth)
+- `POST /api/students/import-excel` (auth)
+- `GET /api/students/import-excel` (auth) - format info
+
+Classes & Subjects
+- `GET /api/classes` (public list)
+- `POST /api/classes` (auth) - assign class to authenticated teacher for a subject
+- `GET /api/subjects` (public list)
+
+Admin (role=admin)
+- `GET /api/admin/classes`
+- `POST /api/admin/classes/add`
+- `GET /api/admin/students`
+- `GET /api/admin/subjects`
+
+Notes (Grades)
+- `GET /api/notes/subjects` (auth, teacher’s assignments)
+- `GET /api/notes/students?matiereId=&classeId=` (auth)
+- `PUT /api/notes/update` (auth) - single update
+- `POST /api/notes/update` (auth) - batch update
+- `GET /api/notes/export?matiereId=&classeId=&format=csv` (auth) - CSV download
+- `POST /api/notes/import-excel` (auth)
+- `GET /api/notes/import-excel/template?matiereId=&classeId=` (auth) - CSV template
+
+Schedules
+- `GET /api/schedule?type=week|date|teacher|class|subject|stats&...`
+- `GET /api/schedule/[id]`
+- `POST /api/schedule` - create schedule
+- `POST /api/schedule/import-pdf` - extract events from PDF via Python
+- `POST /api/schedule/import-schedules` (auth) - persist extracted data
+
+## 🧩 UI Navigation
+
+- Authenticated layout with role-based side navigation: `src/presentation/components/SideNavLayout.tsx`
+- Pages under `app/(authenticated)/*`:
+  - `/gestion-classroom`, `/gestion-emplois`, `/gestion-horraire` (teacher)
+  - `/gestion-classes`, `/gestion-etudiants-admin`, `/gestion-matieres`, `/gestion-teachers` (admin)
+- Login page: `app/login/page.tsx`
+
+## 📥 Imports & Exports
+
+- Students: Excel import (`POST /api/students/import-excel`)
+- Notes: Excel import and CSV export
+- Schedules: PDF import via `extract_schedule.py` (requires `venv` and `requirements.txt`)
+
+## 🖼️ Screenshots
+
+Add screenshots to `public/screenshots/` and update the paths below.
+
+- Login Page
+  - `![Login](public/screenshots/login.png)`
+- Admin - Teachers Management
+  - `![Gestion Enseignants](public/screenshots/gestion-teachers.png)`
+- Notes Management (Teacher)
+  - `![Notes](public/screenshots/notes.png)`
+- Schedules
+  - `![Schedules](public/screenshots/schedules.png)`
+
+Tip: On macOS, press `Shift + Cmd + 4` to capture specific areas.
+
+## 📨 Email & Password Reset
+
+- Uses Gmail via Nodemailer. Configure `GMAIL_USER` and `GMAIL_APP_PASSWORD` (App Password) in `.env.local`.
+- Beautiful HTML email for verification code: `src/infrastructure/services/EmailService.ts`.
+
+## 🔧 Configuration Notes
+
+- Next config ignores type/ESLint errors on build (see `next.config.ts`). Use `npm run lint` during development.
+- Auth cookie name: `auth_token` (httpOnly, secure in production, `sameSite=strict`).
+
+## 🧪 Quick cURL Examples
+
+Login
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"teacher@esprit.tn","password":"secret","rememberMe":true}' \
+  -i
+```
+
+Export Notes CSV
+```bash
+curl -G 'http://localhost:3000/api/notes/export' \
+  --data-urlencode 'matiereId=1' \
+  --data-urlencode 'classeId=2' \
+  -H 'Cookie: auth_token=YOUR_TOKEN_HERE' -o notes.csv
+```
+
+## 🛡️ Production Checklist
+
+- Set strong `JWT_SECRET`
+- Use secure Supabase keys with least privilege
+- Serve over HTTPS, `secure` cookies enabled
+- Configure CI/CD and environment variables in the host
+
+## 👤 Credits
+
+- Developer: Sayari Mohamed Amin
+- Encadrant: Ghassen Klai
+- Institution: Esprit University
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+MIT License.
