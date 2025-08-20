@@ -36,6 +36,35 @@ export class MySQLTeacherRepository implements TeacherRepository {
     }
   }
 
+  async findByIds(ids: number[]): Promise<Teacher[]> {
+    try {
+      if (ids.length === 0) return []
+      
+      const { data, error } = await supabase
+        .from('teacher')
+        .select('id, firstname, lastname, email, departement, motdepasse, photo_url, role')
+        .in('id', ids)
+        .eq('is_active', 1)
+      
+      if (error) throw error
+      if (!data) return []
+      
+      return data.map(teacher => new Teacher(
+        teacher.id,
+        teacher.firstname,
+        teacher.lastname,
+        new Email(teacher.email),
+        teacher.departement,
+        teacher.motdepasse,
+        teacher.photo_url,
+        teacher.role || 'teacher'
+      ))
+    } catch (error) {
+      console.error('Error finding teachers by IDs:', error)
+      throw new Error('Database error occurred while finding teachers')
+    }
+  }
+
   async findByEmail(email: string): Promise<Teacher | null> {
     try {
       const emailVO = new Email(email)

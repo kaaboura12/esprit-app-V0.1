@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { X, Building, Hash, Users, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 
-export interface AddClassFormData {
+export interface AddClassFormDataAdmin {
   nomClasse: string
   bloc: string
   numclasse: number
@@ -13,12 +13,12 @@ export interface AddClassFormData {
 interface AddClassModalAdminProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: AddClassFormData) => Promise<void>
+  onSubmit: (data: AddClassFormDataAdmin) => Promise<void>
   isLoading?: boolean
 }
 
 export function AddClassModalAdmin({ isOpen, onClose, onSubmit, isLoading = false }: AddClassModalAdminProps) {
-  const [formData, setFormData] = useState<AddClassFormData>({
+  const [formData, setFormData] = useState<AddClassFormDataAdmin>({
     nomClasse: '',
     bloc: '',
     numclasse: 1,

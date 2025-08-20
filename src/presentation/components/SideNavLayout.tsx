@@ -47,6 +47,15 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
       teacherOnly: true
     },
     {
+      name: "Gestion PFE",
+      href: "/gestion-pfe",
+      icon: BookOpen,
+      description: "Gérer les projets de fin d'études",
+      badge: null,
+      adminOnly: false,
+      teacherOnly: true
+    },
+    {
       name: "Gestion Classes",
       href: "/gestion-classes",
       icon: BookOpen,

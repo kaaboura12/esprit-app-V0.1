@@ -35,6 +35,33 @@ export class MySQLStudentRepository implements StudentRepository {
     }
   }
 
+  async findByIds(ids: number[]): Promise<Etudiant[]> {
+    try {
+      if (ids.length === 0) return []
+      
+      const { data, error } = await supabase
+        .from('etudiant')
+        .select('id, firstname, lastname, email, classe_id, numero_etudiant, date_naissance')
+        .in('id', ids)
+      
+      if (error) throw error
+      if (!data) return []
+      
+      return data.map(student => new Etudiant(
+        student.id,
+        student.firstname,
+        student.lastname,
+        new Email(student.email),
+        student.classe_id,
+        new StudentNumber(student.numero_etudiant),
+        student.date_naissance
+      ))
+    } catch (error) {
+      console.error('Error finding students by IDs:', error)
+      throw new Error('Database error occurred while finding students')
+    }
+  }
+
   async findByEmail(email: Email): Promise<Etudiant | null> {
     try {
       const { data, error } = await supabase

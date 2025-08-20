@@ -9,6 +9,7 @@ import { StudentNumber } from "../value-objects/StudentNumber"
  */
 export interface StudentRepository {
   findById(id: number): Promise<Etudiant | null>
+  findByIds(ids: number[]): Promise<Etudiant[]>
   findByEmail(email: Email): Promise<Etudiant | null>
   findByStudentNumber(studentNumber: StudentNumber): Promise<Etudiant | null>
   findByClasseId(classeId: number): Promise<Etudiant[]>

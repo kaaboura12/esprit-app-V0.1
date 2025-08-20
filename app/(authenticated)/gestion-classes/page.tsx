@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useAdminClasses } from '@/presentation/hooks/useAdminClasses'
 import { RoleGuard } from '@/presentation/components/SideNavLayout'
-import { AddClassModalAdmin, AddClassFormData } from '@/presentation/components/AddClassModalAdmin'
+import { AddClassModalAdmin, AddClassFormDataAdmin } from '@/presentation/components/AddClassModalAdmin'
 import { 
   BookOpen, 
   Users, 
@@ -90,7 +90,7 @@ export default function GestionClassesPage() {
     return `${firstname} ${lastname}`
   }
 
-  const handleAddClass = async (classData: AddClassFormData) => {
+  const handleAddClass = async (classData: AddClassFormDataAdmin) => {
     setIsAddingClass(true)
     setAddClassError(null)
     setAddClassSuccess(null)

@@ -7,6 +7,7 @@ import { Teacher } from "../entities/Teacher"
  */
 export interface TeacherRepository {
   findById(id: number): Promise<Teacher | null>
+  findByIds(ids: number[]): Promise<Teacher[]>
   findByEmail(email: string): Promise<Teacher | null>
   save(teacher: Teacher): Promise<void>
   delete(id: number): Promise<void>
