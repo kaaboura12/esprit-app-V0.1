@@ -7,7 +7,7 @@ export class MySQLSoutenanceNoteRepository implements SoutenanceNoteRepository {
         // Remove id field when creating new note to let database auto-increment handle it
         const { id, ...noteData } = soutenanceNote;
         
-        console.log('Creating soutenance note with data:', noteData);
+
         
         const { data, error } = await supabase
             .from('soutenance_note')
@@ -24,7 +24,7 @@ export class MySQLSoutenanceNoteRepository implements SoutenanceNoteRepository {
             throw new Error('No data returned after creating soutenance note');
         }
         
-        console.log('Successfully created soutenance note:', data);
+
         return new SoutenanceNoteEntity(data);
     }
 

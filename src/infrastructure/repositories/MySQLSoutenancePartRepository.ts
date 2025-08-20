@@ -7,7 +7,7 @@ export class MySQLSoutenancePartRepository implements SoutenancePartRepository {
         // Remove id field when creating new part to let database auto-increment handle it
         const { id, ...partData } = soutenancePart;
         
-        console.log('Creating soutenance part with data:', partData);
+
         
         const { data, error } = await supabase
             .from('soutenance_part')
@@ -24,7 +24,7 @@ export class MySQLSoutenancePartRepository implements SoutenancePartRepository {
             throw new Error('No data returned after creating soutenance part');
         }
         
-        console.log('Successfully created soutenance part:', data);
+
         return new SoutenancePartEntity(data);
     }
 

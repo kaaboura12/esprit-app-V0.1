@@ -84,23 +84,6 @@ export default function GestionPFEPage() {
         const fetchNames = async () => {
             if (soutenances.length === 0) return;
 
-            // Debug: Log the soutenances data to see what's being received
-            console.log('Soutenances data received:', soutenances);
-            soutenances.forEach((item, index) => {
-                console.log(`Soutenance ${index + 1}:`, {
-                    id: item.soutenance.id,
-                    subject: item.soutenance.sujet,
-                    parts: item.parts.length,
-                    notes: item.notes.length,
-                    notesDetails: item.notes.map(note => ({
-                        id: note.id,
-                        part_id: note.soutenance_part_id,
-                        teacher_id: note.teacher_id,
-                        text_length: note.note_text?.length || 0
-                    }))
-                });
-            });
-
             try {
                 // Extract unique student and teacher IDs from soutenances
                 const studentIds = [...new Set(soutenances.map(s => s.soutenance.etudiant_id))];
@@ -264,16 +247,16 @@ export default function GestionPFEPage() {
                 {/* Success Message */}
                 {successMessage && (
                     <div className="px-4 sm:px-6 md:px-8 pb-4">
-                        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
                                     <span className="text-white text-xs font-bold">✓</span>
                                     </div>
-                                <span className="text-green-800 text-sm font-medium">{successMessage}</span>
+                                <span className="text-red-800 text-sm font-medium">{successMessage}</span>
                             </div>
                             <button
                                 onClick={() => setSuccessMessage(null)}
-                                className="text-green-600 hover:text-green-800 text-sm font-medium"
+                                className="text-red-600 hover:text-red-800 text-sm font-medium"
                             >
                                 ✕
                             </button>
@@ -295,7 +278,7 @@ export default function GestionPFEPage() {
                             </div>
                             <span className="text-red-600 font-bold text-xl sm:text-2xl">{filteredSoutenances.length}</span>
                         </div>
-                        <span className="text-gray-700 text-xs sm:text-sm">Total classes</span>
+                        <span className="text-gray-700 text-xs sm:text-sm">Total Soutenances</span>
                     </div>
                     
                     <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow flex flex-col items-start">
@@ -303,15 +286,17 @@ export default function GestionPFEPage() {
                             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                                 <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
-                            <span className="text-red-600 font-bold text-xl sm:text-2xl">{filteredSoutenances.reduce((total, item) => total + item.notes.length, 0)}</span>
+                            <span className="text-red-600 font-bold text-xl sm:text-2xl">{filteredSoutenances.length}</span>
                         </div>
-                        <span className="text-gray-700 text-xs sm:text-sm">Total étudiants</span>
+                        <span className="text-gray-700 text-xs sm:text-sm">Étudiants PFE</span>
                     </div>
                     
                     <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow flex flex-col items-start">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                                <div className="w-4 h-4 sm:w-5 sm:h-5 text-white font-bold text-lg">%</div>
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
                             </div>
                             <span className="text-red-600 font-bold text-xl sm:text-2xl">
                                 {filteredSoutenances.length > 0 
@@ -319,7 +304,7 @@ export default function GestionPFEPage() {
                                     : 0}%
                             </span>
                         </div>
-                        <span className="text-gray-700 text-xs sm:text-sm">Capacité moyenne</span>
+                        <span className="text-gray-700 text-xs sm:text-sm">Soutenances Évaluées</span>
                     </div>
                     
                     <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow flex flex-col items-start">
@@ -329,7 +314,7 @@ export default function GestionPFEPage() {
                             </div>
                             <span className="text-red-600 font-bold text-xl sm:text-2xl">{filteredSoutenances.filter(item => item.notes.length > 0).length}</span>
                         </div>
-                        <span className="text-gray-700 text-xs sm:text-sm">Classes presque pleines</span>
+                        <span className="text-gray-700 text-xs sm:text-sm">Avec Notes</span>
                     </div>
                 </div>
 
@@ -356,71 +341,65 @@ export default function GestionPFEPage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredSoutenances.map((item: SoutenanceWithDetails) => (
-                            <div key={item.soutenance.id} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                            <div key={item.soutenance.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-gray-200">
                                 {/* Card Header */}
-                                <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-red-50 to-red-100">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-lg font-bold text-red-600 line-clamp-2">
+                                <div className="p-6 border-b border-gray-50 bg-gradient-to-br from-red-50 via-white to-red-50">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex-1 min-w-0 pr-4">
+                                            <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 leading-tight mb-2">
                                                 {item.soutenance.sujet || 'Sujet non spécifié'}
                                             </h3>
-                                        </div>
-                                        <div className="flex items-center gap-1 text-gray-600 text-sm flex-shrink-0">
-                                            <div className="w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                                                <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
+                                            <div className="flex items-center gap-2 text-gray-600 text-sm">
+                                                <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                                                    <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                    </svg>
+                                                </div>
+                                                <span className="font-medium">{getStudentName(item.soutenance.etudiant_id)}</span>
                                             </div>
-                                            <span>{formatDate(item.soutenance.date_soutenance)}</span>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2 text-gray-700">
-                                            <div className="w-6 h-6 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        <div className="flex flex-col items-end gap-2">
+                                            <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
+                                                <span>{formatDate(item.soutenance.date_soutenance)}</span>
                                             </div>
-                                            <span className="font-medium text-sm">{getStudentName(item.soutenance.etudiant_id)}</span>
-                                        </div>
-                                        
-                                        {/* Notes Summary */}
-                                        <div className="flex items-center gap-2">
-                                            {item.notes.length > 0 && (
-                                                <div className="flex items-center gap-1 bg-white/60 px-2 py-1 rounded-lg">
-                                                    <div className="w-4 h-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                                                        <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                        </svg>
+                                            
+                                            {/* Status Badge */}
+                                            <div className="flex items-center gap-2">
+                                                {item.notes.length > 0 && (
+                                                    <div className="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full">
+                                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                                        <span className="text-xs font-medium text-gray-700">
+                                                            {item.notes.length} note{item.notes.length > 1 ? 's' : ''}
+                                                        </span>
                                                     </div>
-                                                    <span className="text-xs font-semibold text-gray-700">
-                                                        {item.notes.length} note{item.notes.length > 1 ? 's' : ''}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {hasTeacherNote(item.parts[0]?.id ?? 0, item.notes) && (
-                                                <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-lg font-medium">
-                                                    Évalué
-                                                </div>
-                                            )}
+                                                )}
+                                                {hasTeacherNote(item.parts[0]?.id ?? 0, item.notes) && (
+                                                    <div className="bg-red-100 text-red-700 text-xs px-3 py-1.5 rounded-full font-medium border border-red-200">
+                                                        ✓ Évalué
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Card Content - Parts with Horizontal Tabs */}
-                                <div className="p-4">
+                                <div className="p-6">
                                     {item.parts.length > 0 && (
-                                        <div className="space-y-4">
+                                        <div className="space-y-5">
                                             {/* Horizontal Tabs for Parts */}
-                                            <div className="flex space-x-1 border-b border-gray-200">
+                                            <div className="flex space-x-1 border-b border-gray-100">
                                                 {item.parts.map((part, partIndex) => (
                                                     <button
                                                         key={part.id ?? partIndex}
                                                         onClick={() => setActiveTabForSoutenance(item.soutenance.id ?? 0, partIndex)}
-                                                        className={`px-3 py-2 text-xs font-medium rounded-t-lg transition-colors ${
+                                                        className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all duration-200 ${
                                                             activeTab[item.soutenance.id ?? 0] === partIndex
-                                                                ? 'bg-red-600 text-white'
-                                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                                ? 'bg-red-600 text-white shadow-sm'
+                                                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-700'
                                                         }`}
                                                     >
                                                         Partie {partIndex + 1}
@@ -436,30 +415,24 @@ export default function GestionPFEPage() {
                                                         key={part.id}
                                                         className={`${activeTab[item.soutenance.id ?? 0] === partIndex ? 'block' : 'hidden'}`}
                                                     >
-                                                        <div className="mb-3">
-                                                            <h4 className="font-semibold text-gray-900 text-sm mb-2">
+                                                        <div className="mb-4">
+                                                            <h4 className="font-medium text-gray-900 text-sm mb-3 text-gray-700">
                                                                 {part.description}
                                                             </h4>
                                                         </div>
 
                                                         <div className="space-y-4">
-                                                            {/* Debug Info */}
-                                                            <div className="text-xs text-gray-500 bg-gray-100 p-2 rounded">
-                                                                Debug: Part ID: {part.id}, Total notes: {item.notes.length}, 
-                                                                Notes for this part: {item.notes.filter(note => note.soutenance_part_id === part.id).length}
-                                                            </div>
-                                                            
                                                             {/* Notes Header */}
                                                             {item.notes.filter(note => note.soutenance_part_id === part.id).length > 0 && (
                                                                 <div className="flex items-center justify-between">
-                                                                    <h5 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                                                        <div className="w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                                                                            <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <h5 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                                        <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                                                                            <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                                             </svg>
                                                                         </div>
                                                                         Notes d'évaluation
-                                                                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                                                        <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
                                                                             {item.notes.filter(note => note.soutenance_part_id === part.id).length}
                                                                         </span>
                                                                     </h5>
@@ -472,38 +445,36 @@ export default function GestionPFEPage() {
                                                                     .filter(note => note.soutenance_part_id === part.id)
                                                                     .sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())
                                                                     .map((note) => (
-                                                                        <div key={note.id} className={`relative rounded-xl p-4 border-l-4 shadow-sm hover:shadow-md transition-all duration-200 ${
+                                                                        <div key={note.id} className={`relative rounded-xl p-4 border transition-all duration-200 ${
                                                                             note.teacher_id === currentTeacherId 
-                                                                                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-l-green-500 border border-green-200' 
-                                                                                : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-l-blue-500 border border-blue-200'
+                                                                                ? 'bg-red-50 border-red-200 shadow-sm' 
+                                                                                : 'bg-gray-50 border-gray-200'
                                                                         }`}>
                                                                             {/* Note Header */}
                                                                             <div className="flex items-start justify-between mb-3">
                                                                                 <div className="flex items-center gap-3">
                                                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                                                                                         note.teacher_id === currentTeacherId 
-                                                                                            ? 'bg-green-500 text-white' 
-                                                                                            : 'bg-blue-500 text-white'
+                                                                                            ? 'bg-red-500 text-white' 
+                                                                                            : 'bg-gray-500 text-white'
                                                                                     }`}>
                                                                                         {getTeacherName(note.teacher_id).split(' ').map(n => n[0]).join('').toUpperCase()}
                                                                                     </div>
                                                                                     <div>
-                                                                                        <div className="flex items-center gap-2">
-                                                                                            <span className="font-semibold text-gray-800 text-sm">
+                                                                                        <div className="flex items-center gap-2 mb-1">
+                                                                                            <span className="font-medium text-gray-800 text-sm">
                                                                                                 {getTeacherName(note.teacher_id)}
                                                                                             </span>
                                                                                             {note.teacher_id === currentTeacherId && (
-                                                                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300">
-                                                                                                    ✅ Ma note
+                                                                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
+                                                                                                    Ma note
                                                                                                 </span>
                                                                                             )}
                                                                                         </div>
                                                                                         <div className="text-xs text-gray-500 flex items-center gap-1">
-                                                                                            <div className="w-4 h-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                                                                                                <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                                                </svg>
-                                                                                            </div>
+                                                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                                            </svg>
                                                                                             {formatDate(note.updated_at || note.created_at!)}
                                                                                             {note.updated_at && note.updated_at !== note.created_at && (
                                                                                                 <span className="text-orange-600 font-medium">(modifiée)</span>
@@ -522,7 +493,7 @@ export default function GestionPFEPage() {
                                                                                                 note_text: note.note_text,
                                                                                                 partDescription: part.description
                                                                                             })}
-                                                                                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
+                                                                                            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
                                                                                             title="Modifier la note"
                                                                                         >
                                                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -531,7 +502,7 @@ export default function GestionPFEPage() {
                                                                                         </button>
                                                                                         <button
                                                                                             onClick={() => handleDeleteNote(part.id ?? 0)}
-                                                                                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+                                                                                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                                                             title="Supprimer la note"
                                                                                         >
                                                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -544,28 +515,24 @@ export default function GestionPFEPage() {
                                                                             
                                                                             {/* Note Content */}
                                                                             <div className="mt-3">
-                                                                                <div className="bg-white/60 rounded-lg p-3 border border-gray-200/50">
+                                                                                <div className="bg-white/80 rounded-lg p-3 border border-gray-200/50">
                                                                                     <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
                                                                                         {note.note_text}
                                                                                     </p>
                                                                                 </div>
                                                                                 
                                                                                 {/* Note Stats */}
-                                                                                <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                                                                                <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
                                                                                     <span className="flex items-center gap-1">
-                                                                                        <div className="w-3 h-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                                                                                            <svg className="w-1.5 h-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                                                                            </svg>
-                                                                                        </div>
+                                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                                                                        </svg>
                                                                                         {note.note_text.length} caractères
                                                                                     </span>
                                                                                     <span className="flex items-center gap-1">
-                                                                                        <div className="w-3 h-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                                                                                            <svg className="w-1.5 h-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                                                                            </svg>
-                                                                                        </div>
+                                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                                                        </svg>
                                                                                         {note.note_text.split(' ').length} mots
                                                                                     </span>
                                                                                 </div>
@@ -576,7 +543,7 @@ export default function GestionPFEPage() {
                                                             
                                                             {/* Add Note Button */}
                                                             {!hasTeacherNote(part.id ?? 0, item.notes) && (
-                                                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                                                <div className="mt-5 pt-4 border-t border-gray-100">
                                                                     <button
                                                                         onClick={() => setEditingNote({
                                                                             soutenance_part_id: part.id ?? 0,
@@ -584,9 +551,9 @@ export default function GestionPFEPage() {
                                                                             note_text: '',
                                                                             partDescription: part.description
                                                                         })}
-                                                                        className="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] text-sm"
+                                                                        className="w-full inline-flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm"
                                                                     >
-                                                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                                                         </svg>
                                                                         Ajouter ma note d'évaluation
@@ -605,7 +572,7 @@ export default function GestionPFEPage() {
                                                                             note_text: '',
                                                                             partDescription: part.description
                                                                         })}
-                                                                        className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+                                                                        className="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm"
                                                                     >
                                                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, FileText, Loader2 } from 'lucide-react';
 
 interface AddNoteModalProps {
@@ -27,6 +27,11 @@ export function AddNoteModal({
   const [noteText, setNoteText] = useState(initialNoteText);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Update noteText when initialNoteText changes (for editing)
+  useEffect(() => {
+    setNoteText(initialNoteText);
+  }, [initialNoteText]);
 
   const handleClose = () => {
     if (!isSubmitting) {

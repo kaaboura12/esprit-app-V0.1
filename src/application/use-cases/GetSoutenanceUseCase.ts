@@ -25,12 +25,9 @@ export class GetSoutenanceUseCase {
         for (const part of parts) {
             if (part.id) {
                 const partNotes = await this.soutenanceNoteRepository.findBySoutenancePartId(part.id);
-                console.log(`Fetching notes for part ${part.id}:`, partNotes.length, 'notes found');
                 allNotes.push(...partNotes);
             }
         }
-
-        console.log(`Soutenance ${id}: ${parts.length} parts, ${allNotes.length} total notes`);
 
         return {
             soutenance,
@@ -51,12 +48,9 @@ export class GetSoutenanceUseCase {
             for (const part of parts) {
                 if (part.id) {
                     const partNotes = await this.soutenanceNoteRepository.findBySoutenancePartId(part.id);
-                    console.log(`Fetching notes for part ${part.id}:`, partNotes.length, 'notes found');
                     allNotes.push(...partNotes);
                 }
             }
-
-            console.log(`Soutenance ${soutenance.id}: ${parts.length} parts, ${allNotes.length} total notes`);
 
             results.push({
                 soutenance,
@@ -80,12 +74,9 @@ export class GetSoutenanceUseCase {
             for (const part of parts) {
                 if (part.id) {
                     const partNotes = await this.soutenanceNoteRepository.findBySoutenancePartId(part.id);
-                    console.log(`Fetching notes for part ${part.id}:`, partNotes.length, 'notes found');
                     allNotes.push(...partNotes);
                 }
             }
-
-            console.log(`Soutenance ${soutenance.id}: ${parts.length} parts, ${allNotes.length} total notes`);
 
             results.push({
                 soutenance,
@@ -109,12 +100,9 @@ export class GetSoutenanceUseCase {
             for (const part of parts) {
                 if (part.id) {
                     const partNotes = await this.soutenanceNoteRepository.findBySoutenancePartId(part.id);
-                    console.log(`Fetching notes for part ${part.id}:`, partNotes.length, 'notes found');
                     allNotes.push(...partNotes);
                 }
             }
-
-            console.log(`Soutenance ${soutenance.id}: ${parts.length} parts, ${allNotes.length} total notes`);
 
             results.push({
                 soutenance,
