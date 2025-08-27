@@ -198,8 +198,8 @@ export default function GestionTeachersPage() {
 
   const getRoleColor = (role: string) => {
     return role === 'admin' 
-      ? 'bg-purple-100 text-purple-700 border-purple-200' 
-      : 'bg-blue-100 text-blue-700 border-blue-200'
+      ? 'bg-red-100 text-red-700 border-red-200' 
+      : 'bg-gray-100 text-gray-700 border-gray-200'
   }
 
   const getRoleIcon = (role: string) => {
@@ -261,7 +261,7 @@ export default function GestionTeachersPage() {
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-200/60 shadow-lg">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                   <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <span className="text-[#ef4444] font-bold text-xl sm:text-2xl">{adminTeachers}</span>
@@ -275,19 +275,19 @@ export default function GestionTeachersPage() {
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-200/60 shadow-lg">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                   <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <span className="text-[#ef4444] font-bold text-xl sm:text-2xl">{regularTeachers}</span>
               </div>
               <span className="text-[#374151] text-xs sm:text-sm">Enseignants</span>
               <div className="mt-4 flex items-center text-xs sm:text-sm">
-                <span className="text-blue-600 font-medium">Actifs</span>
+                <span className="text-gray-600">Actifs</span>
               </div>
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-200/60 shadow-lg">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                   <UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <span className="text-[#ef4444] font-bold text-xl sm:text-2xl">{activeTeachers}</span>
@@ -308,7 +308,7 @@ export default function GestionTeachersPage() {
                 placeholder="Rechercher un enseignant..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all w-full"
+                className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all w-full"
               />
             </div>
           </div>
@@ -326,10 +326,10 @@ export default function GestionTeachersPage() {
             
             <div className="p-4 sm:p-6">
               {loading ? (
-                <div className="min-h-screen bg-gradient-to-br from-[#f3f4f6] via-white to-gray-100 flex items-center justify-center">
+                <div className="flex items-center justify-center py-12">
                   <div className="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-4">
                     <Loader2 className="w-8 h-8 animate-spin text-[#ef4444]" />
-                    <span className="text-lg font-medium">Chargement des enseignants...</span>
+                    <span className="text-lg font-medium text-gray-900">Chargement des enseignants...</span>
                   </div>
                 </div>
               ) : error ? (
@@ -386,7 +386,7 @@ export default function GestionTeachersPage() {
                             )}
                           </div>
                           <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white ${
-                            teacher.isActive ? 'bg-green-500' : 'bg-gray-400'
+                            teacher.isActive ? 'bg-red-500' : 'bg-gray-400'
                           }`}></div>
                         </div>
                         
@@ -499,10 +499,10 @@ export default function GestionTeachersPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
                   <div className={`inline-flex items-center px-3 py-2 rounded-lg border ${
-                    selectedTeacher.isActive ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'
+                    selectedTeacher.isActive ? 'bg-red-100 text-red-700 border-red-200' : 'bg-gray-100 text-gray-700 border-gray-200'
                   }`}>
                     <div className={`w-3 h-3 rounded-full mr-2 ${
-                      selectedTeacher.isActive ? 'bg-green-500' : 'bg-gray-400'
+                      selectedTeacher.isActive ? 'bg-red-500' : 'bg-gray-400'
                     }`}></div>
                     <span className="capitalize">{selectedTeacher.isActive ? 'Actif' : 'Inactif'}</span>
                   </div>
@@ -529,7 +529,7 @@ export default function GestionTeachersPage() {
                     setShowTeacherDetails(false)
                     setEditingTeacher(selectedTeacher.id)
                   }}
-                  className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition-colors"
                 >
                   <Edit3 className="w-4 h-4 mr-2" />
                   Modifier le rôle
@@ -569,7 +569,7 @@ export default function GestionTeachersPage() {
                   value={teachers.find(t => t.id === editingTeacher)?.role || 'teacher'}
                   onChange={(e) => handleUpdateRole(editingTeacher, e.target.value as 'teacher' | 'admin')}
                   disabled={updatingRole === editingTeacher}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 >
                   <option value="teacher">Enseignant</option>
                   <option value="admin">Administrateur</option>
@@ -598,15 +598,15 @@ export default function GestionTeachersPage() {
 
       {/* Success Message Toast */}
       {successMessage && (
-        <div className="fixed top-4 right-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl shadow-lg z-50 max-w-md">
+        <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-lg z-50 max-w-md">
           <div className="flex items-center space-x-2">
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="w-5 h-5 text-red-500" />
             <span className="font-medium">Succès</span>
           </div>
           <p className="text-sm mt-1">{successMessage}</p>
           <button
             onClick={() => setSuccessMessage(null)}
-            className="absolute top-2 right-2 text-green-400 hover:text-green-600"
+            className="absolute top-2 right-2 text-red-400 hover:text-red-600"
           >
             ✕
           </button>
@@ -632,15 +632,15 @@ export default function GestionTeachersPage() {
 
       {/* Add Teacher Success Message Toast */}
       {addTeacherSuccess && (
-        <div className="fixed top-4 right-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl shadow-lg z-50 max-w-md">
+        <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-lg z-50 max-w-md">
           <div className="flex items-center space-x-2">
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="w-5 h-5 text-red-500" />
             <span className="font-medium">Succès</span>
           </div>
           <p className="text-sm mt-1">{addTeacherSuccess}</p>
           <button
             onClick={() => setAddTeacherSuccess(null)}
-            className="absolute top-2 right-2 text-green-400 hover:text-green-600"
+            className="absolute top-2 right-2 text-red-400 hover:text-red-600"
           >
             ✕
           </button>
