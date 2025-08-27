@@ -21,7 +21,7 @@ A full-stack education management platform built with Next.js, TypeScript, and S
 - Framework: Next.js 15, React 19, TypeScript 5
 - Styling: Tailwind CSS 4
 - Auth: jose (JWT), httpOnly cookies
-- DB/Storage: Supabase (`@supabase/supabase-js`)
+- DB/Storage: Supabase (`@supabase/supabase/supabase-js`)
 - Email: Nodemailer (Gmail App Password)
 - Files: Multer-like FormData handling in Next API routes
 - Data import: `xlsx`
@@ -38,6 +38,77 @@ A full-stack education management platform built with Next.js, TypeScript, and S
   - Manage students, teachers (roles), classes, subjects, notes
   - Import/export students and notes
   - Access system-wide statistics
+
+## 🖼️ Application Screenshots
+
+### 🌟 Public Pages
+
+<div align="center">
+  <h3>🏠 Homepage</h3>
+  <img src="public/screenshots/teacher/homepage.png" alt="Homepage" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>🔐 Login Page</h3>
+  <img src="public/screenshots/teacher/loginpage.png" alt="Login Page" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+</div>
+
+### 👨‍🏫 Teacher Dashboard
+
+<div align="center">
+  <h3>📚 Classroom Management</h3>
+  <img src="public/screenshots/teacher/gestionclassroompage.png" alt="Classroom Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>📝 Notes Management</h3>
+  <img src="public/screenshots/teacher/gestionnotepage.png" alt="Notes Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>📅 Schedule Management</h3>
+  <img src="public/screenshots/teacher/gestionhorrairepage.png" alt="Schedule Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>📊 Employment Management</h3>
+  <img src="public/screenshots/teacher/gestionemploispage.png" alt="Employment Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>🎓 PFE Management</h3>
+  <img src="public/screenshots/teacher/gestionpfepage.png" alt="PFE Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>👥 Student Management</h3>
+  <img src="public/screenshots/teacher/gestionetudiantpage.png" alt="Student Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>👤 Profile Page</h3>
+  <img src="public/screenshots/teacher/profilepage.png" alt="Profile Page" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>🧭 Teacher Navigation</h3>
+  <img src="public/screenshots/teacher/sidenavteacher.png" alt="Teacher Navigation" width="400" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+</div>
+
+### 👨‍💼 Admin Dashboard
+
+<div align="center">
+  <h3>🏢 Class Management</h3>
+  <img src="public/screenshots/admin/gestionclasspage.png" alt="Class Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>👨‍🏫 Teacher Management</h3>
+  <img src="public/screenshots/admin/gestionenseignantpageadmin.png" alt="Teacher Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>📚 Subject Management</h3>
+  <img src="public/screenshots/admin/gestionmatierepageadmin.png" alt="Subject Management" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>👥 Student Management (Admin)</h3>
+  <img src="public/screenshots/admin/gestionetudiantadminpage.png" alt="Student Management Admin" width="800" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>🧭 Admin Navigation</h3>
+  <img src="public/screenshots/admin/sidenavadmin.png" alt="Admin Navigation" width="400" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+</div>
+
+### 🔧 Import/Export Features
+
+<div align="center">
+  <h3>📊 Excel Import - Students</h3>
+  <img src="public/screenshots/teacher/modalimportexceletudiant.png" alt="Excel Import Students" width="600" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+  
+  <h3>📄 PDF Import - Schedules</h3>
+  <img src="public/screenshots/teacher/modalimporteremploispdf.png" alt="PDF Import Schedules" width="600" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+</div>
+
+---
 
 ## ⚙️ Environment Variables
 
@@ -182,7 +253,7 @@ Admin (role=admin)
 - `GET /api/admin/subjects`
 
 Notes (Grades)
-- `GET /api/notes/subjects` (auth, teacher’s assignments)
+- `GET /api/notes/subjects` (auth, teacher's assignments)
 - `GET /api/notes/students?matiereId=&classeId=` (auth)
 - `PUT /api/notes/update` (auth) - single update
 - `POST /api/notes/update` (auth) - batch update
@@ -210,21 +281,6 @@ Schedules
 - Students: Excel import (`POST /api/students/import-excel`)
 - Notes: Excel import and CSV export
 - Schedules: PDF import via `extract_schedule.py` (requires `venv` and `requirements.txt`)
-
-## 🖼️ Screenshots
-
-Add screenshots to `public/screenshots/` and update the paths below.
-
-- Login Page
-  - `![Login](public/screenshots/login.png)`
-- Admin - Teachers Management
-  - `![Gestion Enseignants](public/screenshots/gestion-teachers.png)`
-- Notes Management (Teacher)
-  - `![Notes](public/screenshots/notes.png)`
-- Schedules
-  - `![Schedules](public/screenshots/schedules.png)`
-
-Tip: On macOS, press `Shift + Cmd + 4` to capture specific areas.
 
 ## 📨 Email & Password Reset
 
