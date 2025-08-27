@@ -198,10 +198,10 @@ export default function GestionPFEPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex items-center space-x-3 text-gray-600">
-                    <Loader2 className="w-8 h-8 animate-spin text-red-500" />
-                    <span className="text-lg">Chargement des soutenances...</span>
+            <div className="min-h-screen bg-gradient-to-br from-[#f3f4f6] via-white to-gray-100 flex items-center justify-center">
+                <div className="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#ef4444]" />
+                    <span className="text-lg font-medium">Chargement des soutenances...</span>
                 </div>
             </div>
         );

@@ -150,8 +150,11 @@ export default function GestionClassroomPage() {
         {/* Main Content */}
         <div className="px-4 sm:px-6 md:px-8 py-8 sm:py-10">
           {classesLoading ? (
-            <div className="flex items-center justify-center py-24">
-              <Loader2 className="w-10 h-10 animate-spin text-[#ef4444]" />
+            <div className="min-h-screen bg-gradient-to-br from-[#f3f4f6] via-white to-gray-100 flex items-center justify-center">
+              <div className="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-4">
+                <Loader2 className="w-8 h-8 animate-spin text-[#ef4444]" />
+                <span className="text-lg font-medium">Chargement des classes...</span>
+              </div>
             </div>
           ) : classesError ? (
             <div className="flex flex-col items-center justify-center py-24">

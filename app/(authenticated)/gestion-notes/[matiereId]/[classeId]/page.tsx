@@ -350,8 +350,11 @@ export default function NotesDetailPage() {
                     {notesLoading ? (
                       <tr>
                         <td colSpan={hasTPComponent ? 6 : 5} className="px-6 py-12 text-center">
-                          <div className="flex items-center justify-center">
-                            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                          <div className="min-h-screen bg-gradient-to-br from-[#f3f4f6] via-white to-gray-100 flex items-center justify-center">
+                            <div className="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-4">
+                              <Loader2 className="w-8 h-8 animate-spin text-[#ef4444]" />
+                              <span className="text-lg font-medium">Chargement des notes...</span>
+                            </div>
                           </div>
                         </td>
                       </tr>

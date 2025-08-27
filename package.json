@@ -25,6 +25,7 @@
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "dotenv": "^17.1.0",
+    "framer-motion": "^12.23.12",
     "jose": "^6.0.11",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.525.0",

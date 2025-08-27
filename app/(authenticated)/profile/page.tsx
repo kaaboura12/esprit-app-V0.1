@@ -6,21 +6,16 @@ import {
   Calendar, 
   BookOpen, 
   Edit3,
-  Camera,
   Briefcase,
   GraduationCap,
   Loader2
 } from "lucide-react"
-import Image from "next/image"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { useAuth } from "@/presentation/hooks/useAuth"
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const { teacher, loading, updateTeacherPhoto, updateTeacher } = useAuth()
+  const { teacher, loading, updateTeacher } = useAuth()
 
   const [editValues, setEditValues] = useState({
     firstname: teacher?.firstname || '',
@@ -29,6 +24,7 @@ export default function ProfilePage() {
     departement: teacher?.departement || ''
   })
   const [editSuccess, setEditSuccess] = useState<string | null>(null)
+  const [editError, setEditError] = useState<string | null>(null)
 
   // Show loading state while fetching teacher data
   if (loading) {
@@ -62,83 +58,13 @@ export default function ProfilePage() {
     return `${firstname} ${lastname}`
   }
 
-  const handlePhotoUpload = async (file: File) => {
-    if (!file) return
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError('Type de fichier non supporté. Utilisez JPEG, PNG ou WebP.')
-      return
-    }
-
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024 // 5MB
-    if (file.size > maxSize) {
-      setUploadError('Fichier trop volumineux. Taille maximum : 5MB.')
-      return
-    }
-
-    setIsUploading(true)
-    setUploadError(null)
-
-    try {
-      const formData = new FormData()
-      formData.append('photo', file)
-      formData.append('teacherId', teacher.id.toString())
-
-      const response = await fetch('/api/teachers/upload-photo', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const data = await response.json()
-
-      if (data.success && data.photoUrl) {
-        // Update the teacher photo in the auth context
-        updateTeacherPhoto(data.photoUrl)
-        
-        // Store new token and teacher data if provided
-        if (data.token && data.teacher) {
-          // Update localStorage with new token and teacher data
-          localStorage.setItem('auth_token', data.token)
-          localStorage.setItem('teacher', JSON.stringify(data.teacher))
-        }
-        
-        // Show success message (you could add a toast notification here)
-        console.log('Photo uploaded successfully!')
-      } else {
-        setUploadError(data.message || 'Erreur lors du téléchargement de la photo.')
-      }
-    } catch (error) {
-      console.error('Photo upload error:', error)
-      setUploadError('Erreur de connexion. Veuillez réessayer.')
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleCameraClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      handlePhotoUpload(file)
-    }
-    // Reset the input value so the same file can be selected again
-    event.target.value = ''
-  }
-
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditValues({ ...editValues, [e.target.name]: e.target.value })
   }
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsUploading(true)
-    setUploadError(null)
+    setEditError(null)
     setEditSuccess(null)
     try {
       const response = await fetch('/api/teachers/update', {
@@ -152,7 +78,6 @@ export default function ProfilePage() {
       const data = await response.json()
       if (data.success && data.teacher) {
         updateTeacher(data.teacher); // update context in real time
-        updateTeacherPhoto(data.teacher.photoUrl); // keep this for photo
         // Update localStorage with new token and teacher data
         if (data.token && data.teacher) {
           localStorage.setItem('auth_token', data.token)
@@ -161,12 +86,10 @@ export default function ProfilePage() {
         setEditSuccess('Profil mis à jour avec succès !')
         setIsEditing(false)
       } else {
-        setUploadError(data.message || 'Erreur lors de la mise à jour du profil.')
+        setEditError(data.message || 'Erreur lors de la mise à jour du profil.')
       }
     } catch (error) {
-      setUploadError('Erreur de connexion. Veuillez réessayer.')
-    } finally {
-      setIsUploading(false)
+      setEditError('Erreur de connexion. Veuillez réessayer.')
     }
   }
 
@@ -218,11 +141,9 @@ export default function ProfilePage() {
                   {/* Main profile photo container */}
                   <div className="relative w-36 h-36 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-white/30 backdrop-blur-sm">
                     {teacher.photoUrl ? (
-                      <Image
+                      <img
                         src={teacher.photoUrl}
                         alt={getFullName(teacher.firstname, teacher.lastname)}
-                        width={144}
-                        height={144}
                         className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
@@ -230,27 +151,7 @@ export default function ProfilePage() {
                         {getInitials(teacher.firstname, teacher.lastname)}
                       </span>
                     )}
-                    
-                    {/* Upload overlay when uploading */}
-                    {isUploading && (
-                      <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                        <Loader2 className="w-8 h-8 text-white animate-spin" />
-                      </div>
-                    )}
                   </div>
-                  
-                  {/* Camera Icon for Photo Upload */}
-                  <button 
-                    onClick={handleCameraClick}
-                    disabled={isUploading}
-                    className="absolute bottom-1 right-1 w-12 h-12 bg-white hover:bg-gray-50 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 group-hover:scale-110 border-2 border-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isUploading ? (
-                      <Loader2 className="w-5 h-5 text-red-500 animate-spin" />
-                    ) : (
-                      <Camera className="w-5 h-5 text-red-500" />
-                    )}
-                  </button>
                 </div>
                 
                 {/* Name and Role */}
@@ -272,12 +173,12 @@ export default function ProfilePage() {
 
             {/* Content */}
             <div className="p-8">
-              {/* Upload Error Message */}
-              {uploadError && (
+              {/* Error Message */}
+              {editError && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-red-700 text-sm">{uploadError}</p>
+                  <p className="text-red-700 text-sm">{editError}</p>
                   <button 
-                    onClick={() => setUploadError(null)}
+                    onClick={() => setEditError(null)}
                     className="mt-2 text-red-600 hover:text-red-800 text-xs underline"
                   >
                     Fermer
@@ -346,16 +247,14 @@ export default function ProfilePage() {
                   <div className="flex space-x-4">
                     <button
                       type="submit"
-                      className="bg-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50"
-                      disabled={isUploading}
+                      className="bg-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-red-700"
                     >
-                      {isUploading ? <Loader2 className="w-5 h-5 animate-spin inline-block" /> : 'Enregistrer'}
+                      Enregistrer
                     </button>
                     <button
                       type="button"
                       className="bg-gray-200 text-gray-700 px-6 py-2 rounded-xl font-semibold hover:bg-gray-300"
                       onClick={() => setIsEditing(false)}
-                      disabled={isUploading}
                     >
                       Annuler
                     </button>
@@ -409,15 +308,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-
-      {/* Hidden file input for photo upload */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp"
-        onChange={handleFileChange}
-        className="hidden"
-      />
     </>
   )
 } 

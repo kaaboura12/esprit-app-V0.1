@@ -24,7 +24,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
       href: "/gestion-classroom",
       icon: Users,
       description: "Gérer les salles de classe",
-      badge: "12",
+      badge: null,
       adminOnly: false,
       teacherOnly: true
     },
@@ -42,7 +42,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
       href: "/gestion-horraire",
       icon: Clock,
       description: "Gérer les horaires",
-      badge: "3",
+      badge: null,
       adminOnly: false,
       teacherOnly: true
     },

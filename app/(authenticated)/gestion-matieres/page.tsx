@@ -241,8 +241,11 @@ export default function GestionMatieresPage() {
             
             <div className="p-4 sm:p-6">
               {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                <div className="min-h-screen bg-gradient-to-br from-[#f3f4f6] via-white to-gray-100 flex items-center justify-center">
+                  <div className="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#ef4444]" />
+                    <span className="text-lg font-medium">Chargement des matières...</span>
+                  </div>
                 </div>
               ) : error ? (
                 <div className="text-center py-12">
