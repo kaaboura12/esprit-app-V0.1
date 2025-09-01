@@ -3,11 +3,24 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Sparkles, Menu, X } from "lucide-react"
-import { useState } from "react"
-
+import { useState, useEffect } from "react"
+import { useAuth } from "../hooks/useAuth"
 
 export function HomePage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [redirectPath, setRedirectPath] = useState("/gestion-classroom")
+  const { isAuthenticated, isAdmin, loading } = useAuth()
+
+  // Determine redirect path based on user role
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      if (isAdmin()) {
+        setRedirectPath("/gestion-teachers")
+      } else {
+        setRedirectPath("/gestion-classroom")
+      }
+    }
+  }, [isAuthenticated, isAdmin, loading])
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -140,7 +153,7 @@ export function HomePage() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center pt-4 sm:pt-6 lg:pt-8 px-4">
               <Link 
-                href="/gestion-classroom" 
+                href={redirectPath}
                 className="group inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 lg:px-10 py-3 sm:py-4 bg-black text-white rounded-full font-semibold text-base sm:text-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
               >
                 <span>Commencer maintenant</span>
