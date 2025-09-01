@@ -1,36 +1,37 @@
-# Use Node.js 20 to avoid deprecation warnings
+# Use Node 20 LTS Alpine image
 FROM node:20-alpine
 
+# Set working directory
 WORKDIR /app
 
+# Copy package.json and package-lock.json first (for caching)
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy the rest of the app
 COPY . .
 
-# Build arguments for Supabase + Mail + JWT
-ARG SUPABASE_URL
-ARG SUPABASE_KEY
+# Build arguments
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG MAIL_USER
 ARG GMAIL_APP_PASSWORD
 ARG JWT_SECRET
 
-# Make them available during build
-ENV SUPABASE_URL=$SUPABASE_URL
-ENV SUPABASE_KEY=$SUPABASE_KEY
+# Set environment variables for runtime
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 ENV MAIL_USER=$MAIL_USER
 ENV GMAIL_APP_PASSWORD=$GMAIL_APP_PASSWORD
 ENV JWT_SECRET=$JWT_SECRET
 
-# Build Next.js
+# Build Next.js app
 RUN npm run build
 
+# Expose port 3000
 EXPOSE 3000
 
-# Runtime envs
-ENV SUPABASE_URL=$SUPABASE_URL
-ENV SUPABASE_KEY=$SUPABASE_KEY
-ENV MAIL_USER=$MAIL_USER
-ENV GMAIL_APP_PASSWORD=$GMAIL_APP_PASSWORD
-ENV JWT_SECRET=$JWT_SECRET
-
+# Start the app
 CMD ["npm", "start"]

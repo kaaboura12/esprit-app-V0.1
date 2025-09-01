@@ -12,14 +12,10 @@ import { Email } from '@/core/value-objects/Email'
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    console.log('Login API called at:', new Date().toISOString())
-    
     // Parse request body
     const body: LoginRequestDTO = await request.json()
-    console.log('Login request for email:', body.email)
     
     if (!body.email || !body.password) {
-      console.log('Missing email or password')
       const response: AuthResponseDTO = {
         success: false,
         error: 'Email and password are required'
@@ -86,11 +82,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   } catch (error) {
     console.error('Login API error:', error)
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      timestamp: new Date().toISOString()
-    })
     
     const response: AuthResponseDTO = {
       success: false,
