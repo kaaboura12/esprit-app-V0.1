@@ -1,13 +1,33 @@
-FROM node:18-alpine
+# Use Node.js 20 to avoid deprecation warnings
+FROM node:20-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
-
 COPY . .
 
+# Build arguments for Supabase + Mail
+ARG SUPABASE_URL
+ARG SUPABASE_KEY
+ARG MAIL_USER
+ARG GMAIL_APP_PASSWORD
+
+# Make them available during build
+ENV SUPABASE_URL=$SUPABASE_URL
+ENV SUPABASE_KEY=$SUPABASE_KEY
+ENV MAIL_USER=$MAIL_USER
+ENV GMAIL_APP_PASSWORD=$GMAIL_APP_PASSWORD
+
+# Build Next.js
 RUN npm run build
 
 EXPOSE 3000
+
+# Runtime envs
+ENV SUPABASE_URL=$SUPABASE_URL
+ENV SUPABASE_KEY=$SUPABASE_KEY
+ENV MAIL_USER=$MAIL_USER
+ENV GMAIL_APP_PASSWORD=$GMAIL_APP_PASSWORD
+
 CMD ["npm", "start"]
