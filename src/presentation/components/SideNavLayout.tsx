@@ -305,6 +305,9 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-gray-500">
                     © 2024 Esprit Education
+                    <div className="text-xs text-green-600 font-semibold mt-1">
+                      🚀 CI/CD Active
+                    </div>
                   </div>
                   
                   <button 
@@ -471,6 +474,9 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-gray-500">
                     © 2024 Esprit Education
+                    <div className="text-xs text-green-600 font-semibold mt-1">
+                      🚀 CI/CD Active
+                    </div>
                   </div>
                   
                   <button 
