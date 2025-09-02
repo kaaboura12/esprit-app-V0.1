@@ -459,3 +459,4 @@ curl -G 'http://localhost:3000/api/notes/export' \
 ## 📄 License
 
 MIT License.
+# Esprit App - CI/CD Enabled
