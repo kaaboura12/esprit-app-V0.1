@@ -41,6 +41,15 @@ interface Classe {
   numclasse: number;
 }
 
+interface HourlyRate {
+  id: number;
+  shiftType: ShiftType;
+  rateType: 'heures_supp' | 'regular' | 'samedi' | 'soir';
+  rateAmount: number;
+  academicYear: string;
+  isActive: boolean;
+}
+
 const GestionHoraire = () => {
   const { teacher, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<ShiftType>('cours_de_jour');
@@ -54,6 +63,7 @@ const GestionHoraire = () => {
   const [academicYear, setAcademicYear] = useState('');
   const [matieres, setMatieres] = useState<Matiere[]>([]);
   const [classes, setClasses] = useState<Classe[]>([]);
+  const [hourlyRates, setHourlyRates] = useState<HourlyRate[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -128,12 +138,22 @@ const GestionHoraire = () => {
       const classesData = await classesRes.json();
       console.log('Classes API response:', classesData);
       
+      // Fetch hourly rates for the current academic year
+      const ratesRes = await fetch(`${API_BASE_URL}/hourly-rates?academicYear=2024-2025&isActive=true`);
+      if (!ratesRes.ok) {
+        throw new Error(`Hourly rates API failed: ${ratesRes.status}`);
+      }
+      const ratesData = await ratesRes.json();
+      console.log('Hourly rates API response:', ratesData);
+      
       // Ensure data is always an array and has the expected structure
       const safeMatieres = Array.isArray(matieresData) ? matieresData : [];
       const safeClasses = Array.isArray(classesData) ? classesData : [];
+      const safeRates = Array.isArray(ratesData) ? ratesData : [];
       
       setMatieres(safeMatieres);
       setClasses(safeClasses);
+      setHourlyRates(safeRates);
       setAcademicYear('2024-2025'); // Hardcoded for now
     } catch (error) {
       console.error('Error fetching initial data:', error);
@@ -204,6 +224,16 @@ const GestionHoraire = () => {
 
   const periods = ['P1', 'P2', 'P3', 'P4'] as const;
 
+  // Helper function to get hourly rate
+  const getHourlyRate = (shiftType: ShiftType, rateType: 'heures_supp' | 'regular' | 'samedi' | 'soir'): number => {
+    const rate = hourlyRates.find(r => 
+      r.shiftType === shiftType && 
+      r.rateType === rateType && 
+      r.isActive
+    );
+    return rate ? rate.rateAmount : 0;
+  };
+
   // Add new assignment
   const addAssignment = (shiftType: ShiftType) => {
     const newKey = Date.now();
@@ -270,23 +300,29 @@ const GestionHoraire = () => {
     const alternanceTotals = calculateShiftTotals('alternance');
     const soirTotals = calculateShiftTotals('cours_de_soir');
 
+    // Get rates from database
+    const suppRate = getHourlyRate('cours_de_jour', 'heures_supp');
+    const regularRate = getHourlyRate('alternance', 'regular');
+    const saturdayRate = getHourlyRate('alternance', 'samedi');
+    const eveningRate = getHourlyRate('cours_de_soir', 'soir');
+
     // Cours de Jour calculations
     const jourCreneauxS1 = jourTotals.semester1 / 42;
     const jourCreneauxS2 = jourTotals.semester2 / 42;
     const jourHeuresSupp = Math.max(0, jourTotals.totalHours - 378);
-    const jourMontant = jourHeuresSupp * 21;
+    const jourMontant = jourHeuresSupp * suppRate;
 
     // Alternance calculations
     let alternanceMontant = 0;
     if (samediHours === 0) {
-      alternanceMontant = alternanceTotals.totalHours * 21;
+      alternanceMontant = alternanceTotals.totalHours * regularRate;
     } else {
       const simpleHours = alternanceTotals.totalHours - samediHours;
-      alternanceMontant = (simpleHours * 21) + (samediHours * 30);
+      alternanceMontant = (simpleHours * regularRate) + (samediHours * saturdayRate);
     }
 
     // Cours de Soir calculations
-    const soirMontant = soirTotals.totalHours * 30;
+    const soirMontant = soirTotals.totalHours * eveningRate;
 
     // Annual totals
     const totalHeuresSupp = jourHeuresSupp + alternanceTotals.totalHours + soirTotals.totalHours;
@@ -301,7 +337,13 @@ const GestionHoraire = () => {
       },
       alternance: { montant: alternanceMontant },
       soir: { montant: soirMontant },
-      annual: { totalHeuresSupp, totalMontant }
+      annual: { totalHeuresSupp, totalMontant },
+      rates: {
+        suppRate,
+        regularRate,
+        saturdayRate,
+        eveningRate
+      }
     };
   };
 
@@ -470,8 +512,8 @@ const GestionHoraire = () => {
             />
             <div className="text-sm text-[#374151] mt-2">
               {samediHours === 0 ? 
-                'Paiement normal: 21€/heure' : 
-                `Heures normales: ${(totals.totalHours - samediHours).toFixed(1)}h à 21€ + Samedi: ${samediHours}h à 30€`
+                `Paiement normal: ${calculations.rates.regularRate}€/heure` : 
+                `Heures normales: ${(totals.totalHours - samediHours).toFixed(1)}h à ${calculations.rates.regularRate}€ + Samedi: ${samediHours}h à ${calculations.rates.saturdayRate}€`
               }
             </div>
           </div>
@@ -579,6 +621,36 @@ const GestionHoraire = () => {
         {/* Tab Content */}
         {renderShiftContent(activeTab)}
 
+        {/* Current Rates Panel */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
+          <h3 className="text-xl font-semibold mb-6 flex items-center">
+            <DollarSign className="w-5 h-5 mr-2 text-[#ef4444]" />
+            Tarifs Horaire Actuels ({academicYear})
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-[#f3f4f6] p-4 rounded-lg">
+              <div className="text-sm text-[#374151] mb-1">Heures Supplémentaires</div>
+              <div className="text-xl font-bold text-[#ef4444]">{calculations.rates.suppRate}€/h</div>
+              <div className="text-xs text-[#6b7280]">Cours de jour</div>
+            </div>
+            <div className="bg-[#f3f4f6] p-4 rounded-lg">
+              <div className="text-sm text-[#374151] mb-1">Heures Régulières</div>
+              <div className="text-xl font-bold text-[#ef4444]">{calculations.rates.regularRate}€/h</div>
+              <div className="text-xs text-[#6b7280]">Alternance</div>
+            </div>
+            <div className="bg-[#f3f4f6] p-4 rounded-lg">
+              <div className="text-sm text-[#374151] mb-1">Heures Samedi</div>
+              <div className="text-xl font-bold text-[#ef4444]">{calculations.rates.saturdayRate}€/h</div>
+              <div className="text-xs text-[#6b7280]">Alternance</div>
+            </div>
+            <div className="bg-[#f3f4f6] p-4 rounded-lg">
+              <div className="text-sm text-[#374151] mb-1">Cours de Soir</div>
+              <div className="text-xl font-bold text-[#ef4444]">{calculations.rates.eveningRate}€/h</div>
+              <div className="text-xs text-[#6b7280]">Soir</div>
+            </div>
+          </div>
+        </div>
+
         {/* Summary Panel */}
         <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
           <h3 className="text-xl font-semibold mb-6 flex items-center">
@@ -617,7 +689,7 @@ const GestionHoraire = () => {
               <h4 className="font-semibold text-[#374151] mb-3">Cours de Soir</h4>
               <div className="space-y-2 text-sm">
                 <div>Total Heures: <span className="font-bold">{calculateShiftTotals('cours_de_soir').totalHours.toFixed(1)}h</span></div>
-                <div>Prix/Heure: <span className="font-bold">30€</span></div>
+                <div>Prix/Heure: <span className="font-bold">{calculations.rates.eveningRate}€</span></div>
                 <div>Montant: <span className="font-bold text-[#ef4444]">{calculations.soir.montant.toFixed(2)}€</span></div>
                       </div>
                     </div>
@@ -645,7 +717,7 @@ const GestionHoraire = () => {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  <span>Prix de l'heure: 21€ (jour/alternance), 30€ (soir/samedi)</span>
+                  <span>Prix de l'heure: {calculations.rates.suppRate}€ (heures supp), {calculations.rates.regularRate}€ (alternance), {calculations.rates.saturdayRate}€ (samedi), {calculations.rates.eveningRate}€ (soir)</span>
                 </div>
                 <div>Maximum 9 créneaux par semestre</div>
               </div>

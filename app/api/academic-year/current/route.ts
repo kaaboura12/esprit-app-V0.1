@@ -11,13 +11,22 @@ export async function GET() {
       .maybeSingle();
 
     if (error) {
-      console.error('Error fetching current academic year:', error);
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+      // If academic_year table doesn't exist, return current year as fallback
+      console.warn('Academic year table not found, using current year as fallback:', error);
+      const currentYear = new Date().getFullYear();
+      const fallbackYear = `${currentYear}-${currentYear + 1}`;
+      return NextResponse.json({ year: fallbackYear });
     }
 
-    return NextResponse.json(data || null);
+    return NextResponse.json(data || { year: getCurrentYearString() });
   } catch (err) {
-    console.error('Error in GET /api/academic-year/current:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    // Fallback to current year if any error occurs
+    console.warn('Error in GET /api/academic-year/current, using fallback:', err);
+    return NextResponse.json({ year: getCurrentYearString() });
   }
+}
+
+function getCurrentYearString(): string {
+  const currentYear = new Date().getFullYear();
+  return `${currentYear}-${currentYear + 1}`;
 }

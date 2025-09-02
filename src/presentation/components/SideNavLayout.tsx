@@ -90,6 +90,15 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
       badge: null,
       adminOnly: true,
       teacherOnly: false
+    },
+    {
+      name: "Gestion Prix/Heure",
+      href: "/gestion-prixheure",
+      icon: Briefcase,
+      description: "Gérer les prix et tarifs horaires",
+      badge: null,
+      adminOnly: true,
+      teacherOnly: false
     }
   ]
 
