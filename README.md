@@ -1,5 +1,9 @@
 # Esprit Education Management System
 
+## 🚀 CI/CD Test - $(date)
+**Deployment Status**: ✅ CI/CD Pipeline Active
+**Last Deploy**: $(date)
+
 A full-stack education management platform built with Next.js, TypeScript, and Supabase, featuring robust role-based access (Teacher/Admin), modern UI, Excel/PDF imports, and secure authentication.
 
 > Internship project at Esprit University by Sayari Mohamed Amin. Encadrant: Ghassen Klai.
