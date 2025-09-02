@@ -143,8 +143,8 @@ export function getTokenFromCookies(request: NextRequest): string | null {
 export function setAuthCookie(response: NextResponse, token: string, expiresAt: Date, rememberMe: boolean = false): void {
   const cookieOptions: any = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production' && process.env.DOCKER_ENV !== 'true',
+    sameSite: 'lax', // Changed from 'strict' to 'lax' for better Docker compatibility
     path: '/'
   }
 

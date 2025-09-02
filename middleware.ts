@@ -3,7 +3,7 @@ import { JwtTokenServiceSingleton } from '@/infrastructure/services/JwtTokenServ
 import { ValidateTokenUseCase } from '@/application/use-cases/ValidateTokenUseCase';
 
 // List of public routes that don't require authentication
-const publicRoutes = ['/login', '/api/auth/login', '/api/auth/validate', '/favicon.ico'];
+const publicRoutes = ['/login', '/api/auth/login', '/api/auth/validate', '/api/health', '/favicon.ico'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

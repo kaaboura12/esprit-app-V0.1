@@ -1,0 +1,23 @@
+# Development Dockerfile
+FROM node:18-alpine
+
+# Install Python and pdfplumber for PDF processing
+RUN apk add --no-cache python3 py3-pip curl
+RUN pip3 install --break-system-packages pdfplumber==0.10.3
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including dev dependencies)
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "run", "dev"]

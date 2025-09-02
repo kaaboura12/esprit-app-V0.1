@@ -6,7 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docker:build": "docker build -t esprit-app .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env.local esprit-app",
+    "docker:dev": "docker-compose --profile dev up app-dev",
+    "docker:prod": "docker-compose up app",
+    "docker:down": "docker-compose down"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.18",

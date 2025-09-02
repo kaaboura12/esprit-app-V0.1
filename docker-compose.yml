@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - DOCKER_ENV=true
+    env_file:
+      - .env.local
+    volumes:
+      # Mount uploads directory for file persistence
+      - ./public/uploads:/app/public/uploads
+      # Mount temp directory for PDF processing
+      - ./temp:/app/temp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development service (optional)
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - DOCKER_ENV=true
+    env_file:
+      - .env.local
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      - ./public/uploads:/app/public/uploads
+      - ./temp:/app/temp
+    command: npm run dev
+    profiles:
+      - dev
