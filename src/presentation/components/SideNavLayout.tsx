@@ -306,7 +306,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
                   <div className="text-xs text-gray-500">
                     © 2024 Esprit Education
                     <div className="text-xs text-green-600 font-semibold mt-1">
-                      🚀 CI/CD Active
+                      🚀 CI/CD Active - Updated!
                     </div>
                   </div>
                   
@@ -475,7 +475,7 @@ export function SideNavLayout({ children }: SideNavLayoutProps) {
                   <div className="text-xs text-gray-500">
                     © 2024 Esprit Education
                     <div className="text-xs text-green-600 font-semibold mt-1">
-                      🚀 CI/CD Active
+                      🚀 CI/CD Active - Updated!
                     </div>
                   </div>
                   
